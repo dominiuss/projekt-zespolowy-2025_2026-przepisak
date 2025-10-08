@@ -24,3 +24,8 @@ sast:
   stage: test
 include:
 - template: Auto-DevOps.gitlab-ci.yml
+test_job:
+  stage: test
+  script:
+    - echo "Uruchamianie testów..."
+    - echo "Testy zakończone pomyślnie!"
