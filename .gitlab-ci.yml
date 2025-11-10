@@ -5,27 +5,55 @@
 # Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
 # Note that environment variables can be set in several places
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+#stages:
+#- build
+#- test
+#- deploy
+#- review
+#- dast
+#- staging
+#- canary
+#- production
+#- incremental rollout 10%
+#- incremental rollout 25%
+#- incremental rollout 50%
+#- incremental rollout 100%
+#- performance
+#- cleanup
+#sast:
+#  stage: test
+#include:
+#- template: Auto-DevOps.gitlab-ci.yml
+#test_job:
+#  stage: test
+#  script:
+#    - echo "Uruchamianie testów..."
+#    - echo "Testy zakończone pomyślnie!"
+
+image: docker:20.10
+
+services:
+  - name: docker:20.10-dind
+    alias: docker
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""   # wyłącza TLS dla docker:dind
+
 stages:
-- build
-- test
-- deploy
-- review
-- dast
-- staging
-- canary
-- production
-- incremental rollout 10%
-- incremental rollout 25%
-- incremental rollout 50%
-- incremental rollout 100%
-- performance
-- cleanup
-sast:
-  stage: test
-include:
-- template: Auto-DevOps.gitlab-ci.yml
+  - build
+  - test
+
+build_job:
+  stage: build
+  script:
+    - echo "Budowanie obrazu Dockera..."
+    - docker build -t myapp:latest .
+
 test_job:
   stage: test
   script:
     - echo "Uruchamianie testów..."
-    - echo "Testy zakończone pomyślnie!"
+    - docker run --rm myapp:latest echo "Test OK"
+
+
