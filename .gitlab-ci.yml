@@ -69,4 +69,6 @@ docker-test:
   script:
     - docker info
     - docker run hello-world
+  tags:
+    - docker
 
