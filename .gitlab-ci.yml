@@ -57,15 +57,16 @@
 #    - docker run --rm myapp:latest echo "Test OK"
 #
 stages:
-  - test
+  - docker-test
 
-test-runner:
-  stage: test
-  image: alpine:latest
+docker-test:
+  stage: docker-test
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
   script:
-    - echo "Runner działa poprawnie!"
-    - echo "Aktualny użytkownik:" $(whoami)
-    - echo "Bieżący katalog:" $(pwd)
-    - echo "Zawartość katalogu projektu:"
-    - ls -la
+    - docker info
+    - docker run hello-world
 
