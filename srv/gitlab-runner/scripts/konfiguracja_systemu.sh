@@ -76,8 +76,44 @@ else
     echo "GitLab Runner uruchomiony w tle."
 fi
 
-echo "GitLab Runner działa. W kontenerze nie używamy systemd ani autostartu."
+echo "GitLab Runner działa."
 echo "=== Gotowe! ==="
-echo "Runner został zainstalowany i zarejestrowany jako: $RUNNER_NAME"
+echo "Runner zostal zainstalowany i zarejestrowany jako: $RUNNER_NAME"
 echo "Instalacja i konfiguracja zakończona pomyślnie!"
 
+echo "Teraz, uruchomię kontenery, na których będzie działać aplikacja."
+
+echo "Uruchamianie kontenerów z docker-compose..."
+docker compose -f ./runner/docker-compose.yml up -d
+
+# Funkcja czekająca na pełną gotowość kontenera
+wait_for_container() {
+    local container_name="$1"
+    echo "Czekam na uruchomienie kontenera $container_name..."
+
+    # Czekamy aż kontener będzie w stanie "running" i opcjonalnie "healthy"
+    while [ "$(docker inspect -f '{{.State.Running}}' "$container_name")" != "true" ]; do
+        sleep 2
+    done
+
+    # Jeśli masz zdefiniowany healthcheck, odkomentuj poniższą linię:
+    # while [ "$(docker inspect -f '{{.State.Health.Status}}' "$container_name")" != "healthy" ]; do sleep 2; done
+
+    echo "Kontener $container_name jest gotowy."
+}
+
+# Pobranie listy kontenerów z docker-compose
+containers=$(docker compose -f ./runner/docker-compose.yml ps -q)
+
+# Czekanie na wszystkie kontenery
+for container in $containers; do
+    wait_for_container "$container"
+done
+
+# Wykonanie wstępnej konfiguracji w każdym kontenerze
+echo "Uruchamianie wstępnej konfiguracji w kontenerach..."
+for container in $containers; do
+    docker exec -i "$container" bash -c "/scripts/konfiguracja_kontenera.sh"
+done
+
+echo "Wstepna konfiguracja zakonczona."
