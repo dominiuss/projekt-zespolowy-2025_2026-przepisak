@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    restart: always
+    volumes:
+      - ./config:/etc/gitlab-runner  # konfiguracja runnera
+      - /var/run/docker.sock:/var/run/docker.sock  # aby runner mógł uruchamiać kontenery
+#      - ./certs:/etc/gitlab-runner/certs:ro  # Twoje własne certyfikaty CA
+      - ./scripts:/scripts  # skrypty do rejestracji lub pipeline
+      - ./config/ca.local.crt:/usr/local/share/ca-certificates/ca.local.crt
+    environment:
+      - CI_SERVER_URL=https://git.ita.wat.edu.pl
+      - REGISTRATION_TOKEN=TWÓJ_TOKEN_REJESTRACJI
+      - RUNNER_NAME=dind-runner-server
+      - RUNNER_EXECUTOR=docker
+      - DOCKER_IMAGE=debian:bookworm
+      - TLS_CA_FILE=/usr/local/share/ca-certificates/ca.local.crt
+
