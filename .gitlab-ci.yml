@@ -30,30 +30,42 @@
 #    - echo "Uruchamianie testów..."
 #    - echo "Testy zakończone pomyślnie!"
 
-image: docker:20.10
+#image: docker:20.10
+#
+#services:
+#  - name: docker:20.10-dind
+#    alias: docker
 
-services:
-  - name: docker:20.10-dind
-    alias: docker
-
-variables:
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""   # wyłącza TLS dla docker:dind
-
+#variables:
+#  DOCKER_DRIVER: overlay2
+#  DOCKER_TLS_CERTDIR: ""   # wyłącza TLS dla docker:dind
+#
+#stages:
+#  - build
+#  - test
+#
+#build_job:
+#  stage: build
+#  script:
+#    - echo "Budowanie obrazu Dockera..."
+#    - docker build -t myapp:latest .
+#
+#test_job:
+#  stage: test
+#  script:
+#    - echo "Uruchamianie testów..."
+#    - docker run --rm myapp:latest echo "Test OK"
+#
 stages:
-  - build
   - test
 
-build_job:
-  stage: build
-  script:
-    - echo "Budowanie obrazu Dockera..."
-    - docker build -t myapp:latest .
-
-test_job:
+test-runner:
   stage: test
+  image: alpine:latest
   script:
-    - echo "Uruchamianie testów..."
-    - docker run --rm myapp:latest echo "Test OK"
-
+    - echo "Runner działa poprawnie!"
+    - echo "Aktualny użytkownik:" $(whoami)
+    - echo "Bieżący katalog:" $(pwd)
+    - echo "Zawartość katalogu projektu:"
+    - ls -la
 
