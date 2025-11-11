@@ -73,7 +73,7 @@ test-containers:
     - docker info
 
     # Uruchomienie wszystkich kontenerów z docker-compose
-    - docker compose -f /srv/gitlab-runner/docker-compose.yml up -d
+    - docker compose -f /runner/docker-compose.yml up -d
 
     # Poczekaj kilka sekund, żeby kontenery wystartowały
     - echo "Czekam 10 sekund na start kontenerów..."
