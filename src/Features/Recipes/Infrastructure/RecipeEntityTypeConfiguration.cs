@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace PrzepisakApi.src.Features.Recipe.Infrastructure
+namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 {
     public class RecipeEntityTypeConfiguration : IEntityTypeConfiguration<Domain.Recipe>
     {
@@ -52,6 +52,12 @@ namespace PrzepisakApi.src.Features.Recipe.Infrastructure
 
             builder.Property(r => r.AuthorId)
                    .HasColumnName("author_id");
+            builder.HasOne(r => r.Author)
+                   .WithMany()
+                   .HasForeignKey(r => r.AuthorId)
+                   .OnDelete(DeleteBehavior.Restrict)
+                   .HasConstraintName("fk_recipes_users");
+
 
             builder.Property(r => r.CategoryId)
                    .HasColumnName("category_id");

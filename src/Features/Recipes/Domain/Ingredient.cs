@@ -1,4 +1,4 @@
-﻿namespace PrzepisakApi.src.Features.Recipe.Domain
+﻿namespace PrzepisakApi.src.Features.Recipes.Domain
 {
     public class Ingredient
     {

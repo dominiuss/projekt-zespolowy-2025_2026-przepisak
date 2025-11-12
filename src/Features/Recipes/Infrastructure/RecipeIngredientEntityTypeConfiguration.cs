@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PrzepisakApi.src.Features.Recipe.Domain;
+using PrzepisakApi.src.Features.Recipes.Domain;
 
 namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 {

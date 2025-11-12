@@ -1,6 +1,15 @@
-﻿namespace PrzepisakApi.src.Features.Recipe.Domain
+﻿using PrzepisakApi.src.Features.Recipes.Application.DTOs;
+
+namespace PrzepisakApi.src.Features.Recipes.Domain
 {
-    public class IRecipeRepository
+    public interface IRecipeRepository
     {
+        Task<List<RecipeOverviewDTO>> GetAllRecipesAsync();
+        Task<RecipeDTO> GetRecipeByIdAsync(int id);
+        Recipe Add(Recipe recipe);
+        void Delete(int id);
+        Recipe Update(Recipe recipe);
+        Task<List<RecipeOverviewDTO>> SearchRecipesByTitleAsync(string title);
+        Task<List<RecipeOverviewDTO>> SearchRecipesByAuthorNameAsync(string name);
     }
 }
