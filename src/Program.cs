@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using PrzepisakApi.src.Database;
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.Recipes.Infrastructure;
+using PrzepisakApi.src.Features.UserProfile.Domain;
+using PrzepisakApi.src.Features.UserProfile.Infrastructure;
 using System.Reflection;
 using Scalar.AspNetCore;
 using Mapster;
@@ -28,6 +30,8 @@ builder.Services.AddScoped<IEfContext, EfContext>();
 builder.Services.AddSingleton<DapperContext>();
 
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
+
+builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
