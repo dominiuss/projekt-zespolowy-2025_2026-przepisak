@@ -7,21 +7,28 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="MediatR" Version="13.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Scalar.AspNetCore" Version="2.8.11" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="src\Features\Auth\" />
-    <Folder Include="src\Features\Recipes\Application\" />
-    <Folder Include="src\Features\Recipes\Api\" />
-    <Folder Include="src\Features\UserProfile\Application\" />
-    <Folder Include="src\Features\UserProfile\Api\" />
-    <Folder Include="src\Features\UserProfile\Infrastructure\" />
+    <Folder Include="src\Features\UserProfiles\Application\" />
+    <Folder Include="src\Features\UserProfiles\Api\" />
     <Folder Include="src\Migrations\" />
     <Folder Include="src\Extenstions\" />
     <Folder Include="src\tests\" />
