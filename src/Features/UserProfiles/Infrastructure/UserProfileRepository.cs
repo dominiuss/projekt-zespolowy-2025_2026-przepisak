@@ -23,7 +23,6 @@ namespace PrzepisakApi.src.Features.UserProfile.Infrastructure
             var user = new User
             {
                 Id = userId,
-                Username = string.Empty
             };
 
             await _db.Users.AddAsync(user, ct);

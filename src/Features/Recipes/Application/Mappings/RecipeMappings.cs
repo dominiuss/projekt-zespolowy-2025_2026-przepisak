@@ -41,7 +41,7 @@ namespace PrzepisakApi.src.Features.Recipes.Application.Mappings
 
             TypeAdapterConfig<Recipe, AddUpdateRecipeDTO>.NewConfig()
                 .Map(dest => dest.Id, src => src.Id)
-                .Map(dest => dest.AuthorName, src => src.Author != null ? src.Author.Username : null)
+                .Map(dest => dest.AuthorName, src => src.Author != null ? src.Author.IdentityUser.UserName : null)
                 .Map(dest => dest.CategoryName, src => src.Category != null ? src.Category.Name : null)
                 .Map(dest => dest.Title, src => src.Title)
                 .Map(dest => dest.Description, src => src.Description)
