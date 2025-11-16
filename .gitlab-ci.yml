@@ -59,41 +59,55 @@
 stages:
   - test
 
+# Job testowy dla wszystkich kontenerów
 test-containers:
   stage: test
-  image: docker:24.0-dind
-  services:
-    - docker:24.0-dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-  before_script:
-    - apk add --no-cache curl docker-compose
+  image: docker:24.0  # tylko CLI Dockera
   script:
     - echo "Sprawdzanie dostępności Dockera..."
     - docker info
 
     # Uruchomienie kontenerów z docker-compose
-    - echo "Uruchamiam kontenery..."
-    - docker compose -f /git/runner/docker-compose.yml up -d
+    - echo "Uruchamianie kontenerów..."
+    - docker compose -f /git/containers/docker-compose.yml up -d
 
-    # Poczekaj chwilę, aż kontenery się uruchomią
-    - echo "Czekam 10 sekund na start kontenerów..."
-    - sleep 10
+    # Funkcja czekająca na kontener
+    - |
+      wait_for_container() {
+        local name=$1
+        echo "Czekam na kontener $name..."
+        until [ "$(docker inspect -f '{{.State.Running}}' $name 2>/dev/null)" == "true" ]; do
+          sleep 2
+        done
+        echo "Kontener $name uruchomiony."
+      }
 
-    # Test frontendu po nazwie usługi z docker-compose
-    - echo "Test frontendu (web)..."
-    - docker exec web curl -sSf http://localhost:5000 || echo "Frontend nie działa"
+    # Lista kontenerów z compose
+    - containers=$(docker compose -f /git/containers/docker-compose.yml ps -q)
+
+    # Czekanie na wszystkie kontenery
+    - for c in $containers; do wait_for_container $c; done
+
+    # Test frontendu
+    - echo "Test frontendu..."
+    - apk add --no-cache curl || true
+    - curl -sSf http://localhost:5000 || echo "Frontend nie działa"
 
     # Test backendu
-    - echo "Test backendu (api)..."
-    - docker exec api curl -sSf http://localhost:5035 || echo "Backend nie działa"
+    - echo "Test backendu..."
+    - curl -sSf http://localhost:5035 || echo "Backend nie działa"
+
+    # Test bazy danych (sprawdzenie portu)
+    - echo "Test bazy danych..."
+    - nc -zv localhost 5432 || echo "Baza danych nie działa"
 
     # Lista uruchomionych kontenerów
-    - echo "Lista kontenerów:"
+    - echo "Uruchomione kontenery:"
     - docker ps
+
   tags:
     - docker
+
 
 
 
