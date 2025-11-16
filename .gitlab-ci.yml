@@ -1,29 +1,12 @@
 stages:
   - docker-test
-  - containers-setup
 
 docker-test:
   stage: docker-test
-  image: docker:latest
+  image: docker:cli
   variables:
     DOCKER_HOST: unix:///var/run/docker.sock
   script:
-    - echo "Debug mode"
-    - sleep infinity
-    - echo "Sprawdzam Docker hosta..."
     - docker info
-    - docker run --rm hello-world
-
-containers-setup:
-  stage: containers-setup
-  image: docker:24.0
-  variables:
-    DOCKER_HOST: unix:///var/run/docker.sock
-  script:
-    - echo "Uruchamianie kontenerów z docker-compose..."
-    - docker compose -f /git/containers/docker-compose.yml up -d
-    - echo "Uruchamianie konfiguracji kontenerów..."
-    - /scripts/containers_setup.sh
-  tags:
-    - docker
+    - docker run hello-world
 
