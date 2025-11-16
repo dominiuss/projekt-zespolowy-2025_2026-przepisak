@@ -4,13 +4,9 @@ stages:
 docker-test:
   stage: docker-test
   image: docker:latest
-  services:
-    - docker:dind
   variables:
-    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: /var/run/docker.sock
   script:
     - docker info
-    - docker run hello-world
-  tags:
-    - docker
+    - docker run --rm hello-world
 
