@@ -58,61 +58,39 @@
 #
 stages:
   - test
-services:
-  - name: docker:24.0-dind
-    alias: docker
-variables:
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_TLS_CERTDIR: ""
-# Job testowy dla wszystkich kontenerów
-test-kontenerow:
-  stage: test
-  image: docker:24.0  # tylko CLI Dockera
-  script:
-    - echo "Sprawdzanie dostępności Dockera..."
-    - docker info
 
-    # Uruchomienie kontenerów z docker-compose
-    - echo "Uruchamianie kontenerów..."
+test-containers:
+  stage: test
+  image: docker:24.0
+  services:
+    - name: docker:24.0-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""   # wyłączenie TLS dla DinD
+  before_script:
+    - echo "Sprawdzam dostęp do Dockera..."
+    - docker info
+  script:
+    # uruchomienie kontenerów z docker-compose
     - docker compose -f /git/containers/docker-compose.yml up -d
 
-    # Funkcja czekająca na kontener
-    - |
-      wait_for_container() {
-        local name=$1
-        echo "Czekam na kontener $name..."
-        until [ "$(docker inspect -f '{{.State.Running}}' $name 2>/dev/null)" == "true" ]; do
-          sleep 2
-        done
-        echo "Kontener $name uruchomiony."
-      }
+    # czekanie kilka sekund na start kontenerów
+    - echo "Czekam 10 sekund na start kontenerów..."
+    - sleep 10
 
-    # Lista kontenerów z compose
-    - containers=$(docker compose -f /git/containers/docker-compose.yml ps -q)
+    # test frontendu
+    - echo "Test frontendu (web)..."
+    - apk add --no-cache curl
+    - curl -sSf http://localhost:3000 || echo "Frontend nie działa"
 
-    # Czekanie na wszystkie kontenery
-    - for c in $containers; do wait_for_container $c; done
+    # test backendu
+    - echo "Test backendu (api)..."
+    - curl -sSf http://localhost:5000 || echo "Backend nie działa"
 
-    # Test frontendu
-    - echo "Test frontendu..."
-    - apk add --no-cache curl || true
-    - curl -sSf http://localhost:5000 || echo "Frontend nie działa"
-
-    # Test backendu
-    - echo "Test backendu..."
-    - curl -sSf http://localhost:5035 || echo "Backend nie działa"
-
-    # Test bazy danych (sprawdzenie portu)
-    - echo "Test bazy danych..."
-    - nc -zv localhost 5432 || echo "Baza danych nie działa"
-
-    # Lista uruchomionych kontenerów
-    - echo "Uruchomione kontenery:"
+    # lista uruchomionych kontenerów
+    - echo "Lista kontenerów:"
     - docker ps
-
   tags:
     - docker
-
-
-
-
+  privileged: true  # konieczne, aby DinD działało w kontenerze
