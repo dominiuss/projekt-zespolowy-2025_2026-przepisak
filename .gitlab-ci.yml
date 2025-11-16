@@ -5,7 +5,7 @@ docker-test:
   stage: docker-test
   image: docker:latest
   variables:
-    DOCKER_HOST: /var/run/docker.sock
+    DOCKER_HOST: unix:///var/run/docker.sock
   script:
     - docker info
     - docker run --rm hello-world
