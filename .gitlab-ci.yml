@@ -73,20 +73,20 @@ test-containers:
     - docker info
 
     # Uruchomienie wszystkich kontenerów z docker-compose
-    - docker compose -f /runner/docker-compose.yml up -d
+#    - docker compose -f /runner/docker-compose.yml up -d
 
     # Poczekaj kilka sekund, żeby kontenery wystartowały
-    - echo "Czekam 10 sekund na start kontenerów..."
-    - sleep 10
+ #   - echo "Czekam 10 sekund na start kontenerów..."
+  #  - sleep 10
 
     # Test frontendu
     - echo "Test frontendu (web)..."
     - apk add --no-cache curl
-    - curl -sSf http://localhost:3000 || echo "Frontend nie działa"
+    - curl -sSf http://localhost:5000 || echo "Frontend nie działa"
 
     # Test backendu
     - echo "Test backendu (api)..."
-    - curl -sSf http://localhost:5000 || echo "Backend nie działa"
+    - curl -sSf http://localhost:5035 || echo "Backend nie działa"
 
     # Lista uruchomionych kontenerów
     - echo "Lista kontenerów:"
