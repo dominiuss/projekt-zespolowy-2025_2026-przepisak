@@ -1,0 +1,5 @@
+home/
+srv/
+.gitlab-ci.yml
+runner/scripts/runner_setup.sh.backup
+przepisak/
