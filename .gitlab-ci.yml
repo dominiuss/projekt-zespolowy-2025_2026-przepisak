@@ -1,8 +1,8 @@
 stages:
   - test
 
-variables:
-  DOCKER_HOST: unix:///var/run/docker.sock
+#variables:
+#  DOCKER_HOST: unix:///var/run/docker.sock
 
 test-containers:
   stage: test
