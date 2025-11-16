@@ -1,0 +1,39 @@
+stages:
+  - test
+
+variables:
+  DOCKER_HOST: unix:///var/run/docker.sock
+
+test-containers:
+  stage: test
+  image: docker:latest
+  services: []
+  script:
+    # Sprawdzenie Dockera
+    - echo "Sprawdzanie dostępności Dockera..."
+    - docker info
+
+    # Uruchomienie kontenerów z aktualnego branchu
+    - echo "Uruchamianie kontenerów z brancha $CI_COMMIT_REF_NAME..."
+    - chmod +x /git/containers/containers_setup.sh
+    - /git/containers/containers_setup.sh
+
+    # Poczekaj kilka sekund, żeby kontenery wystartowały
+    - echo "Czekam 10 sekund na start kontenerów..."
+    - sleep 10
+
+    # Test frontendu
+    - echo "Test frontendu (frontend-przepisak)..."
+    - apk add --no-cache curl
+    - curl -sSf http://localhost:5000 || echo "Frontend nie działa"
+
+    # Test backendu
+    - echo "Test backendu (backend-przepisak)..."
+    - curl -sSf http://localhost:5035 || echo "Backend nie działa"
+
+    # Lista uruchomionych kontenerów
+    - echo "Lista uruchomionych kontenerów:"
+    - docker ps
+
+  tags:
+    - docker
