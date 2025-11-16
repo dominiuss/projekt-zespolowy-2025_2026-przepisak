@@ -58,9 +58,14 @@
 #
 stages:
   - test
-
+services:
+  - name: docker:24.0-dind
+    alias: docker
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
 # Job testowy dla wszystkich kontenerów
-test-containers:
+test-kontenerow:
   stage: test
   image: docker:24.0  # tylko CLI Dockera
   script:
