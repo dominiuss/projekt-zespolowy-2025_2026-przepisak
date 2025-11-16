@@ -59,15 +59,19 @@
 stages:
   - build
   - test
-variables:
-  DOCKER_HOST: unix:///var/run/docker.sock
+#variables:
+#  DOCKER_HOST: unix:///var/run/docker.sock
 
 # ======================
 # Build frontend & backend
 # ======================
 build-containers:
   stage: build
-  image: docker:24.0
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
   tags:
     - docker
   before_script:
