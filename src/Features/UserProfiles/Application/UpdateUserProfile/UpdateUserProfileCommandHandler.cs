@@ -21,8 +21,6 @@ namespace PrzepisakApi.src.Features.UserProfile.Application.UpdateUserProfile
             var user = await _repository.GetByUserIdAsync(request.UserId, cancellationToken)
                        ?? await _repository.CreateForUserAsync(request.UserId, cancellationToken);
 
-            user.Username = request.Username;
-
             await _repository.SaveAsync(cancellationToken);
 
             return _mapper.Map<UserProfileDTO>(user);

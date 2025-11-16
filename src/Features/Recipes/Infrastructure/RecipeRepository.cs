@@ -9,11 +9,13 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
     {
         private readonly IEfContext _efContext;
         private readonly DapperContext _dapperContext;
+
         public RecipeRepository(IEfContext efContext, DapperContext dapperContext)
         {
             _efContext = efContext;
             _dapperContext = dapperContext;
         }
+
         public async Task<List<RecipeOverviewDTO>> GetAllRecipesAsync()
         {
             using var connection = _dapperContext.CreateConnection();
@@ -21,17 +23,19 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             var sql = @"
                 SELECT 
                     r.title AS Title,
-                    u.username AS AuthorName,
+                    iu.UserName AS AuthorName,
                     r.description AS Description,
                     r.image_url AS ImageUrl
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
+                JOIN AspNetUsers iu ON iu.Id = u.identity_user_id
                 ORDER BY r.created_at DESC;
             ";
 
             var result = await connection.QueryAsync<RecipeOverviewDTO>(sql);
             return result.ToList();
         }
+
         public async Task<RecipeDTO> GetRecipeByIdAsync(int id)
         {
             using var connection = _dapperContext.CreateConnection();
@@ -39,7 +43,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             var sql = @"
                 SELECT 
                     r.title AS Title,
-                    u.username AS AuthorName,
+                    iu.UserName AS AuthorName,
                     r.description AS Description,
                     r.instructions AS Instructions,
                     r.preparation_time AS PreparationTime,
@@ -52,6 +56,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
                     r.updated_at AS UpdatedAt
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
+                JOIN AspNetUsers iu ON iu.Id = u.identity_user_id
                 LEFT JOIN categories c ON c.id = r.category_id
                 WHERE r.id=@Id;
             ";
@@ -63,49 +68,57 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         public async Task<List<RecipeOverviewDTO>> SearchRecipesByTitleAsync(string title)
         {
             using var connection = _dapperContext.CreateConnection();
+
             var sql = @"
                 SELECT
                     r.title AS Title,
-                    u.username AS AuthorName,
+                    iu.UserName AS AuthorName,
                     r.description AS Description,
                     r.image_url AS ImageUrl
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
+                JOIN AspNetUsers iu ON iu.Id = u.identity_user_id
                 WHERE r.title LIKE @Title
                 ORDER BY r.created_at DESC;
             ";
-            var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, new { Title = title });
+
+            var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, new { Title = $"%{title}%" });
             return result.ToList();
         }
+
         public async Task<List<RecipeOverviewDTO>> SearchRecipesByAuthorNameAsync(string name)
         {
             using var connection = _dapperContext.CreateConnection();
+
             var sql = @"
                 SELECT
                     r.title AS Title,
-                    u.username AS AuthorName,
+                    iu.UserName AS AuthorName,
                     r.description AS Description,
                     r.image_url AS ImageUrl
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
-                WHERE u.username LIKE @AuthorName
+                JOIN AspNetUsers iu ON iu.Id = u.identity_user_id
+                WHERE iu.UserName LIKE @AuthorName
                 ORDER BY r.created_at DESC;
             ";
-            var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, new { AuthorName = name });
+
+            var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, new { AuthorName = $"%{name}%" });
             return result.ToList();
         }
+
         public Recipe Add(Recipe recipe)
         {
             _efContext.Recipes.Add(recipe);
             return recipe;
         }
+
         public Recipe Update(Recipe recipe)
         {
             var existingRecipe = _efContext.Recipes.FirstOrDefault(r => r.Id == recipe.Id);
             if (existingRecipe == null)
-            {
                 return null;
-            }
+
             existingRecipe.Title = recipe.Title;
             existingRecipe.Description = recipe.Description;
             existingRecipe.Instructions = recipe.Instructions;
@@ -120,13 +133,12 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 
             return existingRecipe;
         }
+
         public void Delete(int id)
         {
             var recipe = _efContext.Recipes.FirstOrDefault(x => x.Id == id);
             if (recipe != null)
-            {
                 _efContext.Recipes.Remove(recipe);
-            }
         }
     }
 }

@@ -8,6 +8,9 @@ using System.Reflection;
 using Scalar.AspNetCore;
 using Mapster;
 using MapsterMapper;
+using PrzepisakApi.src.Features.Auth.Infrastructure;
+using PrzepisakApi.src.Features.Auth.Domain;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,10 +30,14 @@ builder.Services.AddDbContext<EfContext>(options =>
 
 builder.Services.AddScoped<IEfContext, EfContext>();
 
+builder.Services.AddIdentityCore<IdentityUser>()
+    .AddEntityFrameworkStores<EfContext>();
+
 builder.Services.AddSingleton<DapperContext>();
 
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 
 builder.Services.AddMediatR(cfg =>
@@ -40,8 +47,9 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<EfContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>(); //seeding
     dbContext.Database.EnsureCreated();
-    dbContext.SeedData();
+    dbContext.SeedData(userManager); //seeding
 }
 
 if (app.Environment.IsDevelopment())
