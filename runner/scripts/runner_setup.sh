@@ -112,7 +112,7 @@ done
 # Wykonanie wstępnej konfiguracji w każdym kontenerze
 echo "Uruchamianie wstępnej konfiguracji w kontenerach..."
 for container in $containers; do
-    docker exec -i "$container" bash -c "/scripts/container_setup.sh"
+    docker exec -i "$container" bash -c "/git/containers/container_setup.sh"
 done
 
 echo "Wstepna konfiguracja zakonczona."

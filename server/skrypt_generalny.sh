@@ -57,6 +57,8 @@ systemctl start docker
 usermod -aG docker student
 # === 4. Uruchomienie skryptu Runnera ===
 echo "[4/4] Uruchomienie skryptu Runnera..."
-docker compose -f server/docker-compose.yml up -d --privileged
+docker compose -f server/docker-compose.yml down
+docker compose -f containers/docker-compose.yml down
+docker compose -f server/docker-compose.yml up -d
 docker exec -it gitlab-runner /git/runner/scripts/runner_setup.sh		# Skrypt musi byc w odpowiednim katalogu, oraz wszystkie musza byc utworzone
 									# Nalezy rowniez byc w katalogu /git/
