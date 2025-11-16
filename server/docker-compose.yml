@@ -11,6 +11,7 @@ services:
       - /git/ca.local.crt:/usr/local/share/ca-certificates/ca.local.crt
       - /git/ca.local.crt:/git/ca.local.crt
       - /git/runner/docker-compose.yml:/git/runner/docker-compose.yml
+      - /git/containers/:/git/containers/
     environment:
       - CI_SERVER_URL=https://git.ita.wat.edu.pl
       - REGISTRATION_TOKEN=glrt-vyAkqLw-bR-1XqC30MC5LW86MQpwOjU5CnQ6Mwp1OjJ1EQ.01.1a1n9cgle

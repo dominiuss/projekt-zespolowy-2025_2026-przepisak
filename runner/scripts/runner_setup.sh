@@ -4,37 +4,16 @@ set -e
 ### KONFIGURACJA ###
 GITLAB_URL="https://git.ita.wat.edu.pl"
 GITLAB_TOKEN="glrt-vyAkqLw-bR-1XqC30MC5LW86MQpwOjU5CnQ6Mwp1OjJ1EQ.01.1a1n9cgle"
-<<<<<<< HEAD
-RUNNER_NAME="dind-runner"
-=======
 RUNNER_NAME="gitlab-runner-server"
->>>>>>> 1596993 (Uruchom Runner w kontenerze Docker Compose)
 DOCKER_IMAGE="docker:latest"
 RUNNER_TAGS="docker,linux,student"
 
 # === 1. Aktualizacja systemu ===
-<<<<<<< HEAD
-echo "[1/6] Aktualizacja systemu..."
-apt update -y && apt upgrade -y && apt install ssh -y && apt install nano -y
-
-# === 2. Zabezpieczenie systemu ===
-apt install -y ufw
-ufw default deny incoming
-ufw default allow outgoing
-ufw allow 22/tcp    # SSH
-ufw allow 80/tcp    # HTTP
-ufw allow 443/tcp   # HTTPS
-ufw enable
-
-# === 3. Instalacja Dockera na Ubuntu 24 ===
-echo "[3/6] Instalacja Dockera..."
-=======
 echo "[1/5] Aktualizacja systemu..."
 apt update -y && apt upgrade -y && apt install ssh -y && apt install nano -y && apt install sudo -y
 
 # === 2. Instalacja Dockera na Ubuntu 24 ===
-echo "[3/5] Instalacja Dockera..."
->>>>>>> 1596993 (Uruchom Runner w kontenerze Docker Compose)
+echo "[2/5] Instalacja Dockera..."
 if [ -f /etc/apt/keyrings/docker.gpg ]; then
     rm /etc/apt/keyrings/docker.gpg
 fi
@@ -61,20 +40,6 @@ apt update -y
 # Zainstaluj Dockera i wtyczki
 apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-<<<<<<< HEAD
-# Dodaj użytkownika 'student' do grupy docker
-usermod -aG docker student
-
-echo "[3/6] Instalacja Dockera zakończona."
-
-# === 4. Instalacja GitLab Runnera ===
-echo "[4/6] Instalacja GitLab Runnera..."
-curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | bash
-apt install -y gitlab-runner
-
-# === 5. Rejestracja GitLab Runnera ===
-echo "[5/6] Rejestracja GitLab Runnera..."
-=======
 # Dodaj użytkownika 'root' do grupy docker
 usermod -aG docker root
 
@@ -87,7 +52,6 @@ apt install -y gitlab-runner
 
 # === 4. Rejestracja GitLab Runnera ===
 echo "[4/5] Rejestracja GitLab Runnera..."
->>>>>>> 1596993 (Uruchom Runner w kontenerze Docker Compose)
 #docker run --rm -v $(pwd)/config:/etc/gitlab-runner gitlab/gitlab-runner:latest register --non-interactive \
 gitlab-runner register --non-interactive \
   --url "$GITLAB_URL" \
@@ -99,13 +63,8 @@ gitlab-runner register --non-interactive \
   --description "$RUNNER_NAME" \
   --tls-ca-file="/usr/local/share/ca-certificates/ca.local.crt"
 
-<<<<<<< HEAD
-# === 6. Uruchomienie GitLab Runnera ===
-echo "[6/6] Uruchamianie GitLab Runnera..."
-=======
 # === 5. Uruchomienie GitLab Runnera ===
 echo "[5/5] Uruchamianie GitLab Runnera..."
->>>>>>> 1596993 (Uruchom Runner w kontenerze Docker Compose)
 
 # Sprawdzenie, czy runner już działa
 if pgrep -x "gitlab-runner" > /dev/null; then
@@ -120,12 +79,11 @@ echo "GitLab Runner działa."
 echo "=== Gotowe! ==="
 echo "Runner zostal zainstalowany i zarejestrowany jako: $RUNNER_NAME"
 echo "Instalacja i konfiguracja zakończona pomyślnie!"
-<<<<<<< HEAD
 
 echo "Teraz, uruchomię kontenery, na których będzie działać aplikacja."
 
 echo "Uruchamianie kontenerów z docker-compose..."
-docker compose -f ./runner/docker-compose.yml up -d
+docker compose -f /git/containers/docker-compose.yml up -d
 
 # Funkcja czekająca na pełną gotowość kontenera
 wait_for_container() {
@@ -154,9 +112,7 @@ done
 # Wykonanie wstępnej konfiguracji w każdym kontenerze
 echo "Uruchamianie wstępnej konfiguracji w kontenerach..."
 for container in $containers; do
-    docker exec -i "$container" bash -c "/scripts/konfiguracja_kontenera.sh"
+    docker exec -i "$container" bash -c "/scripts/container_setup.sh"
 done
 
 echo "Wstepna konfiguracja zakonczona."
-=======
->>>>>>> 1596993 (Uruchom Runner w kontenerze Docker Compose)
