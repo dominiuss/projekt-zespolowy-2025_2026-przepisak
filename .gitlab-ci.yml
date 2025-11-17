@@ -47,11 +47,11 @@ test-containers:
 
     # Test frontend → nazwa usługi z compose: web
     - echo "Test frontendu (web)..."
-    - docker exec web curl -sSf http://localhost:5000 || echo "Frontend nie działa"
+    - docker exec frontend-przepisak curl -sSf http://localhost:5000 || echo "Frontend nie działa"
 
     # Test backend → nazwa usługi: api
     - echo "Test backendu (api)..."
-    - docker exec api curl -sSf http://localhost:5035 || echo "Backend nie działa"
+    - docker exec backend-przepisak curl -sSf http://localhost:5035 || echo "Backend nie działa"
 
     - echo "Lista kontenerów:"
     - docker ps
