@@ -4,25 +4,99 @@ import { useNavigate } from "react-router-dom";
 export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const navigate = useNavigate();
 
-  // -----------------------------------------
-  // CUSTOM MESSAGES — MOŻESZ ZMIENIAĆ DOWOLNIE
-  // -----------------------------------------
-  const MSG_SUCCESS = "Konto zostało utworzone! Za chwilę nastąpi przekierowanie.";
+  // ----------------------------
+  // Custom messages
+  // ----------------------------
+  const MSG_SUCCESS =
+    "Konto zostało utworzone! Za chwilę nastąpi przekierowanie.";
   const MSG_GENERIC_ERROR = "Wystąpił błąd podczas rejestracji.";
   const MSG_USERNAME_TAKEN = "Taki użytkownik już istnieje. Wybierz inną nazwę.";
-  const MSG_WEAK_PASSWORD = "Hasło jest zbyt słabe. Użyj co najmniej 6 znaków.";
-  // -----------------------------------------
+  const MSG_WEAK_PASSWORD =
+    "Hasło musi mieć min. 8 znaków, 1 wielką literę i 1 cyfrę.";
+  const MSG_SHORT_USERNAME =
+    "Nazwa użytkownika musi zawierać co najmniej 4 znaki.";
+  // ----------------------------
 
+  // VALIDATION
+  const validateUsername = (u) => u.length >= 4;
+
+  const validatePassword = (pwd) => {
+    const minLength = pwd.length >= 8;
+    const hasUpper = /[A-Z]/.test(pwd);
+    const hasDigit = /\d/.test(pwd);
+
+    return minLength && hasUpper && hasDigit;
+  };
+
+  // ----------------------------
+  // Live validation — USERNAME
+  // ----------------------------
+  const handleUsernameChange = (e) => {
+    const newValue = e.target.value;
+
+    setUsername(newValue);
+    setSuccess("");
+
+    if (newValue.length === 0) {
+      setError(""); 
+      return;
+    }
+
+    if (!validateUsername(newValue)) {
+      setError(MSG_SHORT_USERNAME);
+    } else {
+      setError("");
+    }
+  };
+
+  // ----------------------------
+  // Live validation — PASSWORD
+  // ----------------------------
+  const handlePasswordChange = (e) => {
+    const newValue = e.target.value;
+
+    setPassword(newValue);
+    setSuccess("");
+
+    if (newValue.length === 0) {
+      setError("");
+      return;
+    }
+
+    if (!validatePassword(newValue)) {
+      setError(MSG_WEAK_PASSWORD);
+    } else {
+      setError("");
+    }
+  };
+
+  // ----------------------------
+  // FORM SUBMIT
+  // ----------------------------
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
+    // 1. Validate USERNAME first
+    if (!validateUsername(username)) {
+      setError(MSG_SHORT_USERNAME);
+      return;
+    }
+
+    // 2. Validate PASSWORD second
+    if (!validatePassword(password)) {
+      setError(MSG_WEAK_PASSWORD);
+      return;
+    }
+
+    // 3. Send to backend
     try {
       const res = await fetch("http://localhost:5035/api/auth/register", {
         method: "POST",
@@ -31,14 +105,10 @@ export default function Register() {
       });
 
       if (!res.ok) {
-        // Odczyt treści z backendu 
         const text = await res.text();
 
-        // Dopasowanie do kodów błędu
         if (text.includes("Username already exists")) {
           setError(MSG_USERNAME_TAKEN);
-        } else if (text.includes("password")) {
-          setError(MSG_WEAK_PASSWORD);
         } else {
           setError(MSG_GENERIC_ERROR);
         }
@@ -46,12 +116,10 @@ export default function Register() {
         return;
       }
 
-      // Sukces
+      // Success
       setSuccess(MSG_SUCCESS);
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+      setTimeout(() => navigate("/login"), 1500);
 
     } catch (err) {
       setError(MSG_GENERIC_ERROR);
@@ -70,7 +138,7 @@ export default function Register() {
             type="text"
             placeholder="Nazwa użytkownika"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={handleUsernameChange}
             className="p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
           />
 
@@ -78,7 +146,7 @@ export default function Register() {
             type="password"
             placeholder="Hasło"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
             className="p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
           />
 
@@ -89,8 +157,12 @@ export default function Register() {
             Zarejestruj się
           </button>
 
-          {error && <p className="text-red-600 text-center font-medium">{error}</p>}
-          {success && <p className="text-green-600 text-center font-medium">{success}</p>}
+          {error && (
+            <p className="text-red-600 text-center font-medium">{error}</p>
+          )}
+          {success && (
+            <p className="text-green-600 text-center font-medium">{success}</p>
+          )}
         </form>
       </div>
     </div>
