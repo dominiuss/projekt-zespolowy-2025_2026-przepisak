@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using PrzepisakApi.src.Database;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
+
 
 namespace miejsce.api.src.Data
 {
@@ -16,7 +18,8 @@ namespace miejsce.api.src.Data
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
             var optionsBuilder = new DbContextOptionsBuilder<EfContext>();
-            optionsBuilder.UseSqlite(connectionString);
+            //optionsBuilder.UseSqlite(connectionString);
+	    optionsBuilder.UseNpgsql(connectionString);
 
             return new EfContext(optionsBuilder.Options);
         }
