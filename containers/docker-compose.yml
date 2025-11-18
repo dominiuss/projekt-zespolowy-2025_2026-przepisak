@@ -1,0 +1,44 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend-przepisak
+    ports:
+      - "5000:5000"
+    environment:
+      ADRES_SERWERA: "https://10.6.57.161:5035/"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend-przepisak
+    ports:
+      - "5035:5035"
+    environment:
+      ASPNETCORE_URLS: http://+:5035
+      ConnectionStrings__DefaultConnection: "Host=przepisak-db;Port=5432;Database=przepisak;Username=student;Password=wcy"
+    depends_on:
+      - przepisak-db
+    restart: unless-stopped
+
+  przepisak-db:
+    image: postgres:18
+    container_name: przepisak-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: student
+      POSTGRES_PASSWORD: wcy
+      POSTGRES_DB: przepisak
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  postgres_data:

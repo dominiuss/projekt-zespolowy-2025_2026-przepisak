@@ -1,4 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+// Dodane przez Rafała
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
+
 using PrzepisakApi.src.Database;
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.Recipes.Infrastructure;
@@ -14,9 +19,24 @@ using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Zezwolenie na przyjmowanie zapytań
+var allowedOrigin = "http://10.6.57.161:5000";
+
 // Mapster configuration
 var config = TypeAdapterConfig.GlobalSettings;
 config.Scan(typeof(Program).Assembly);
+
+// Zezwolenie na przyjmowanie zapytań
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendCorsPolicy", policy =>
+    {
+        policy.WithOrigins(allowedOrigin)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, Mapper>();
@@ -25,8 +45,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
+//builder.Services.AddDbContext<EfContext>(options =>
+//    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddDbContext<EfContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IEfContext, EfContext>();
 
@@ -59,6 +82,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Zezwolenie na przyjmowanie zapytań
+app.UseCors("FrontendCorsPolicy");
+
 app.UseAuthorization();
 
 app.MapControllers();
