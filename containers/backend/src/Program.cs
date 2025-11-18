@@ -19,9 +19,24 @@ using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Zezwolenie na przyjmowanie zapytań
+var allowedOrigin = "http://10.6.57.161:5000";
+
 // Mapster configuration
 var config = TypeAdapterConfig.GlobalSettings;
 config.Scan(typeof(Program).Assembly);
+
+// Zezwolenie na przyjmowanie zapytań
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendCorsPolicy", policy =>
+    {
+        policy.WithOrigins(allowedOrigin)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, Mapper>();
@@ -67,6 +82,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Zezwolenie na przyjmowanie zapytań
+app.UseCors("FrontendCorsPolicy");
+
 app.UseAuthorization();
 
 app.MapControllers();
