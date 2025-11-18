@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
 
 export default function Home() {
   const [recipes, setRecipes] = useState([]);
@@ -11,7 +13,7 @@ export default function Home() {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:5035/api");
+        const res = await fetch("http://10.6.57.161:5035/api");
         if (!res.ok) throw new Error("Błąd pobierania danych");
         const data = await res.json();
         setRecipes(data);
@@ -35,8 +37,8 @@ export default function Home() {
     setLoading(true);
     try {
       const [byNameRes, byTitleRes] = await Promise.all([
-        fetch(`http://localhost:5035/api/search/name?query=${search}`),
-        fetch(`http://localhost:5035/api/search/title?query=${search}`)
+        fetch(`http://10.6.57.161:5035/api/search/name?query=${search}`),
+        fetch(`http://10.6.57.161:5035/api/search/title?query=${search}`)
       ]);
 
       if (!byNameRes.ok || !byTitleRes.ok) throw new Error("Błąd wyszukiwania");
@@ -86,9 +88,10 @@ export default function Home() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full">
           {displayedRecipes.map((recipe) => (
-            <div
+            <Link
+              to={`/recipe/${recipe.id}`}
               key={recipe.id}
-              className="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-105 transform transition"
+              className="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-105 transform transition block"
             >
               <img
                 src={recipe.image || "https://via.placeholder.com/400x300"}
@@ -100,7 +103,8 @@ export default function Home() {
                 <p className="text-sm text-gray-500 mb-2">Autor: {recipe.author}</p>
                 <p className="text-gray-600">{recipe.description}</p>
               </div>
-            </div>
+            </Link>
+
           ))}
         </div>
       )}

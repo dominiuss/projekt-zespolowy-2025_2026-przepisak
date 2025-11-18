@@ -98,7 +98,7 @@ export default function Register() {
 
     // 3. Send to backend
     try {
-      const res = await fetch("http://localhost:5035/api/auth/register", {
+      const res = await fetch("http://10.6.57.161:5035/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
