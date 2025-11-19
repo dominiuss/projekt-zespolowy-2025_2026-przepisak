@@ -1,11 +1,10 @@
 ﻿using MediatR;
 using PrzepisakApi.src.Features.UserProfiles.Application.DTOs;
 
-namespace PrzepisakApi.src.Features.UserProfile.Application.UpdateUserProfile
+public class UpdateUserProfileCommand : IRequest<UserProfileDTO>
 {
-    public class UpdateUserProfileCommand : IRequest<UserProfileDTO>
-    {
-        public int UserId { get; set; }
-        public string Username { get; set; }
-    }
+    public int UserId { get; set; }
+    public string username { get; set; }
+    public string? Bio { get; set; }
+    public string? AvatarUrl { get; set; }
 }

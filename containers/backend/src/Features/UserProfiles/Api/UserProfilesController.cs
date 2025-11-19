@@ -22,11 +22,10 @@ namespace PrzepisakApi.src.Features.UserProfile.Api
         {
             var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (idClaim is null)
-                return 1; // na sztywno na testy
+                return 1;
 
             return int.Parse(idClaim.Value);
         }
-
 
         [HttpGet]
         public async Task<ActionResult<UserProfileDTO>> Get()
@@ -43,10 +42,17 @@ namespace PrzepisakApi.src.Features.UserProfile.Api
         }
 
         [HttpPut]
-        public async Task<ActionResult<UserProfileDTO>> Update([FromBody] UpdateUserProfileCommand command)
+        public async Task<ActionResult<UserProfileDTO>> Update([FromBody] UpdateProfileRequestDto dto)
         {
             var userId = GetCurrentUserId();
-            command.UserId = userId;
+
+            var command = new UpdateUserProfileCommand
+            {
+                UserId = userId,
+                username = dto.username,
+                Bio = dto.Bio,
+                AvatarUrl = dto.AvatarUrl
+            };
 
             var result = await _mediator.Send(command);
             return Ok(result);
