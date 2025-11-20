@@ -19,12 +19,19 @@ namespace PrzepisakApi.src.Features.UserProfile.Application.GetUserProfile
         public async Task<UserProfileDTO?> Handle(GetUserProfileQuery request, CancellationToken cancellationToken)
         {
             var user = await _repository.GetByUserIdAsync(request.UserId, cancellationToken);
-            if (user is null)
+
+            if (user is null || user.IdentityUser is null)
             {
                 return null;
             }
 
-            return _mapper.Map<UserProfileDTO>(user);
+            return new UserProfileDTO
+            {
+                Id = user.Id,
+                Username = user.IdentityUser.UserName,
+                Bio = user.Bio,
+                AvatarUrl = user.AvatarUrl
+            };
         }
     }
 }
