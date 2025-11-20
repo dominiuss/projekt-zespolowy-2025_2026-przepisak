@@ -1,21 +1,29 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Mapster;
+using MapsterMapper;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 // Dodane przez Rafała
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
-
+using PrzepisakApi.api.src.Features.Auth.Infrastructure.Options;
+using PrzepisakApi.api.src.Features.Auth.Services;
+using PrzepisakApi.src;
 using PrzepisakApi.src.Database;
+using PrzepisakApi.src.Features.Auth.Domain;
+using PrzepisakApi.src.Features.Auth.Infrastructure;
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.Recipes.Infrastructure;
 using PrzepisakApi.src.Features.UserProfile.Domain;
 using PrzepisakApi.src.Features.UserProfile.Infrastructure;
-using System.Reflection;
 using Scalar.AspNetCore;
-using Mapster;
-using MapsterMapper;
-using PrzepisakApi.src.Features.Auth.Infrastructure;
-using PrzepisakApi.src.Features.Auth.Domain;
-using Microsoft.AspNetCore.Identity;
+using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,9 +53,32 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
-//builder.Services.AddDbContext<EfContext>(options =>
-//    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.Configure<JwtSettings>(
+    builder.Configuration.GetSection(nameof(JwtSettings)));
 
+var jwtSettings = new JwtSettings();
+builder.Configuration.Bind(nameof(JwtSettings), jwtSettings);
+builder.Services
+    .AddAuthentication(a =>
+    {
+        a.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(jwt =>
+    {
+        jwt.SaveToken = true;
+        jwt.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.SigningKey)),
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidateAudience = true,
+            ValidAudiences = jwtSettings.Audiences,
+            ValidateLifetime = true,
+        };
+        jwt.Audience = jwtSettings.Audiences[0];
+        jwt.ClaimsIssuer = jwtSettings.Issuer;
+    });
 builder.Services.AddDbContext<EfContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -57,6 +88,9 @@ builder.Services.AddIdentityCore<IdentityUser>()
     .AddEntityFrameworkStores<EfContext>();
 
 builder.Services.AddSingleton<DapperContext>();
+builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 

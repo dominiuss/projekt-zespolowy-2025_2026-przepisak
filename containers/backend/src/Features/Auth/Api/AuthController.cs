@@ -1,8 +1,15 @@
 ﻿using MapsterMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using PrzepisakApi.api.src.Features.Auth.Application.DTOs;
+using PrzepisakApi.api.src.Features.Auth.Application.Login;
 using PrzepisakApi.api.src.Features.Auth.Application.Register;
+using PrzepisakApi.api.src.Features.Auth.Services;
 using PrzepisakApi.src.Features.Auth.Application.DTOs;
+using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
+using FluentValidation;
+using ValidationException = FluentValidation.ValidationException;
 
 namespace PrzepisakApi.src.Features.Auth.Api
 {
@@ -12,11 +19,12 @@ namespace PrzepisakApi.src.Features.Auth.Api
     {
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
-       // private readonly ITokenService _tokenService;
-        public AuthController(IMapper mapper, IMediator mediator)
+        private readonly ITokenService _tokenService;
+        public AuthController(IMapper mapper, IMediator mediator, ITokenService tokenService)
         {
             _mapper = mapper;
             _mediator = mediator;
+            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -28,68 +36,83 @@ namespace PrzepisakApi.src.Features.Auth.Api
         }
 
 
-        //[HttpPost("login")]
-        //public async Task<IActionResult> Login(Login login)
-        //{
-        //    var command = _mapper.Map<LoginCommand>(login);
-        //    var response = await _mediator.Send(command);
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginRequestDTO loginDTO)
+        {
+            var command = _mapper.Map<LoginCommand>(loginDTO);
+            LoginResponse response;
+            try 
+            { 
+                response = await _mediator.Send(command);
+            }
 
-        //    if (!response.IsSuccess)
-        //        return BadRequest(response.Errors);
+            catch(ValidationException ex)
+            {
+                return BadRequest(new
+                {
+                    ErrorMessage = "Błąd walidacji danych wejściowych.",
+                    Errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage })
+                });
+            }
+            if (response.ErrorMessage != null)
+            {
+                return Unauthorized(new { ErrorMessage = response.ErrorMessage });
+            }
 
-        //    var cookieOptions = new CookieOptions
-        //    {
-        //        HttpOnly = true,
-        //        Secure = true,
-        //        SameSite = SameSiteMode.Strict,
-        //        Expires = DateTime.UtcNow.AddDays(7)
-        //    };
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
 
-        //    Response.Cookies.Append("refreshToken", response.Value.RefreshToken, cookieOptions);
+            Response.Cookies.Append("refreshToken", response.RefreshToken, cookieOptions);
 
-        //    return Ok(new AuthenticationResult
-        //    {
-        //        Token = response.Value.Token,
-        //        Expiration = response.Value.Expiration
-        //    });
-        //}
+            return Ok(new LoginResponse
+            {
+                Token = response.Token,
+                Expiration = response.Expiration
+            });
+        }
 
-        //[HttpPost("refresh-token")]
-        //public async Task<IActionResult> RefreshToken()
-        //{
-        //    var refreshToken = Request.Cookies["refreshToken"];
-        //    if (refreshToken == null)
-        //        return Unauthorized("Refresh token missing");
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (refreshToken == null)
+                return Unauthorized("Refresh token missing");
 
-        //    var accessToken = Request.Headers["Authorization"]
-        //        .ToString()
-        //        .Replace("Bearer ", "");
+            var accessToken = Request.Headers["Authorization"]
+                .ToString()
+                .Replace("Bearer ", "");
 
-        //    var handler = new JwtSecurityTokenHandler();
-        //    var jwt = handler.ReadJwtToken(accessToken);
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(accessToken);
 
-        //    var identityId = jwt.Claims.First(x => x.Type == "IdentityId").Value;
+            var identityId = jwt.Claims.First(x => x.Type == "IdentityId").Value;
 
-        //    var tokens = await _tokenService.RefreshTokensAsync(identityId, refreshToken);
-        //    if (tokens == null)
-        //        return Unauthorized("Invalid refresh token");
+            var tokens = await _tokenService.RefreshTokensAsync(identityId, refreshToken);
+            if (tokens == null)
+                return Unauthorized("Invalid refresh token");
 
-        //    Response.Cookies.Append(
-        //        "refreshToken",
-        //        tokens.RefreshToken,
-        //        new CookieOptions
-        //        {
-        //            HttpOnly = true,
-        //            Secure = true,
-        //            SameSite = SameSiteMode.Strict,
-        //            Expires = DateTime.UtcNow.AddDays(7)
-        //        }
-        //    );
+            Response.Cookies.Append(
+                "refreshToken",
+                tokens.RefreshToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(7)
+                }
+            );
 
-        //    return Ok(new
-        //    {
-        //        token = tokens.AccessToken,
-        //        expiration = DateTime.UtcNow.AddHours(2)
-        //    });
+            return Ok(new
+            {
+                token = tokens.AccessToken,
+                expiration = DateTime.UtcNow.AddHours(2)
+            });
         }
     }
+}

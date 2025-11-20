@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using PrzepisakApi.src.Features.UserProfiles.Domain;
 
 namespace PrzepisakApi.src.Features.UserProfile.Domain
 {
@@ -9,5 +10,6 @@ namespace PrzepisakApi.src.Features.UserProfile.Domain
         public int Id { get; set; }
         public string? Bio { get; set; }
         public string? AvatarUrl { get; set; }
+        public RefreshToken RefreshToken { get; set; } = null!;
     }
 }
