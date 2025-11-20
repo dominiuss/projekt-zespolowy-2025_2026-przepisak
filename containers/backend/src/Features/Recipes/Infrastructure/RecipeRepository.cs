@@ -20,15 +20,16 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         {
             using var connection = _dapperContext.CreateConnection();
 
+            // POPRAWKA: Cudzysłowy dla "UserName" i "Id"
             var sql = @"
                 SELECT 
                     r.title AS Title,
-                    iu.UserName AS AuthorName,
+                    iu.""UserName"" AS AuthorName,
                     r.description AS Description,
                     r.image_url AS ImageUrl
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
-                JOIN AspNetUsers iu ON iu.Id = u.identity_user_id
+                JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
                 ORDER BY r.created_at DESC;
             ";
 
@@ -40,10 +41,11 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         {
             using var connection = _dapperContext.CreateConnection();
 
+            // POPRAWKA: Cudzysłowy dla "UserName" i "Id"
             var sql = @"
                 SELECT 
                     r.title AS Title,
-                    iu.UserName AS AuthorName,
+                    iu.""UserName"" AS AuthorName,
                     r.description AS Description,
                     r.instructions AS Instructions,
                     r.preparation_time AS PreparationTime,
@@ -56,7 +58,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
                     r.updated_at AS UpdatedAt
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
-                JOIN AspNetUsers iu ON iu.Id = u.identity_user_id
+                JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
                 LEFT JOIN categories c ON c.id = r.category_id
                 WHERE r.id=@Id;
             ";
@@ -69,15 +71,16 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         {
             using var connection = _dapperContext.CreateConnection();
 
+            // POPRAWKA: Cudzysłowy dla "UserName" i "Id"
             var sql = @"
                 SELECT
                     r.title AS Title,
-                    iu.UserName AS AuthorName,
+                    iu.""UserName"" AS AuthorName,
                     r.description AS Description,
                     r.image_url AS ImageUrl
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
-                JOIN AspNetUsers iu ON iu.Id = u.identity_user_id
+                JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
                 WHERE r.title LIKE @Title
                 ORDER BY r.created_at DESC;
             ";
@@ -90,16 +93,17 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         {
             using var connection = _dapperContext.CreateConnection();
 
+            // POPRAWKA: Cudzysłowy dla "UserName" i "Id"
             var sql = @"
                 SELECT
                     r.title AS Title,
-                    iu.UserName AS AuthorName,
+                    iu.""UserName"" AS AuthorName,
                     r.description AS Description,
                     r.image_url AS ImageUrl
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
-                JOIN AspNetUsers iu ON iu.Id = u.identity_user_id
-                WHERE iu.UserName LIKE @AuthorName
+                JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
+                WHERE iu.""UserName"" LIKE @AuthorName
                 ORDER BY r.created_at DESC;
             ";
 
