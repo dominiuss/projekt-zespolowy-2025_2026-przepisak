@@ -16,11 +16,10 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             _dapperContext = dapperContext;
         }
 
-        public async Task<List<RecipeOverviewDTO>> GetAllRecipesAsync()
+        public async Task<List<RecipeOverviewDTO>> GetAllRecipesAsync(List<int>? categoryIds = null)
         {
             using var connection = _dapperContext.CreateConnection();
 
-            // POPRAWKA: Cudzysłowy dla "UserName" i "Id"
             var sql = @"
                 SELECT 
                     r.title AS Title,
@@ -30,18 +29,24 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
                 JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
-                ORDER BY r.created_at DESC;
+                WHERE 1=1 
             ";
 
-            var result = await connection.QueryAsync<RecipeOverviewDTO>(sql);
+            if (categoryIds != null && categoryIds.Any())
+            {
+                sql += " AND r.category_id = ANY(@CategoryIds)";
+            }
+
+            sql += " ORDER BY r.created_at DESC;";
+
+            var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, new { CategoryIds = categoryIds?.ToArray() });
+
             return result.ToList();
         }
 
         public async Task<RecipeDTO> GetRecipeByIdAsync(int id)
         {
             using var connection = _dapperContext.CreateConnection();
-
-            // POPRAWKA: Cudzysłowy dla "UserName" i "Id"
             var sql = @"
                 SELECT 
                     r.title AS Title,
@@ -62,7 +67,6 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
                 LEFT JOIN categories c ON c.id = r.category_id
                 WHERE r.id=@Id;
             ";
-
             var result = await connection.QuerySingleOrDefaultAsync<RecipeDTO>(sql, new { Id = id });
             return result;
         }
@@ -70,10 +74,8 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         public async Task<List<RecipeOverviewDTO>> SearchRecipesByTitleAsync(string title)
         {
             using var connection = _dapperContext.CreateConnection();
-
-            // POPRAWKA: Cudzysłowy dla "UserName" i "Id"
             var sql = @"
-                SELECT
+                SELECT 
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -84,7 +86,6 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
                 WHERE r.title LIKE @Title
                 ORDER BY r.created_at DESC;
             ";
-
             var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, new { Title = $"%{title}%" });
             return result.ToList();
         }
@@ -92,10 +93,8 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         public async Task<List<RecipeOverviewDTO>> SearchRecipesByAuthorNameAsync(string name)
         {
             using var connection = _dapperContext.CreateConnection();
-
-            // POPRAWKA: Cudzysłowy dla "UserName" i "Id"
             var sql = @"
-                SELECT
+                SELECT 
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -106,7 +105,6 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
                 WHERE iu.""UserName"" LIKE @AuthorName
                 ORDER BY r.created_at DESC;
             ";
-
             var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, new { AuthorName = $"%{name}%" });
             return result.ToList();
         }
@@ -120,8 +118,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         public Recipe Update(Recipe recipe)
         {
             var existingRecipe = _efContext.Recipes.FirstOrDefault(r => r.Id == recipe.Id);
-            if (existingRecipe == null)
-                return null;
+            if (existingRecipe == null) return null;
 
             existingRecipe.Title = recipe.Title;
             existingRecipe.Description = recipe.Description;
@@ -134,15 +131,13 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             existingRecipe.AuthorId = recipe.AuthorId;
             existingRecipe.CategoryId = recipe.CategoryId;
             existingRecipe.UpdatedAt = DateTime.UtcNow;
-
             return existingRecipe;
         }
 
         public void Delete(int id)
         {
             var recipe = _efContext.Recipes.FirstOrDefault(x => x.Id == id);
-            if (recipe != null)
-                _efContext.Recipes.Remove(recipe);
+            if (recipe != null) _efContext.Recipes.Remove(recipe);
         }
     }
 }

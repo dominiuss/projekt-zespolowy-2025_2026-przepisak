@@ -4,7 +4,8 @@ namespace PrzepisakApi.src.Features.Recipes.Domain
 {
     public interface IRecipeRepository
     {
-        Task<List<RecipeOverviewDTO>> GetAllRecipesAsync();
+        Task<List<RecipeOverviewDTO>> GetAllRecipesAsync(List<int>? categoryIds = null);
+
         Task<RecipeDTO> GetRecipeByIdAsync(int id);
         Recipe Add(Recipe recipe);
         void Delete(int id);

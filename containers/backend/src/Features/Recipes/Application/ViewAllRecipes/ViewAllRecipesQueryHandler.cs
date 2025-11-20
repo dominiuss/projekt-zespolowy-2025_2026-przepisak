@@ -8,12 +8,15 @@ namespace PrzepisakApi.src.Features.Recipes.Application.ViewAllRecipes
     {
         private readonly IRecipeRepository _recipeRepository;
 
-        public ViewAllRecipesQueryHandler(IRecipeRepository recipeRepository) {
+        public ViewAllRecipesQueryHandler(IRecipeRepository recipeRepository)
+        {
             _recipeRepository = recipeRepository;
         }
+
         public async Task<List<RecipeOverviewDTO>> Handle(ViewAllRecipesQuery request, CancellationToken cancellationToken)
         {
-            var recipes = await _recipeRepository.GetAllRecipesAsync();
+            var recipes = await _recipeRepository.GetAllRecipesAsync(request.CategoryIds);
+
             return recipes;
         }
     }

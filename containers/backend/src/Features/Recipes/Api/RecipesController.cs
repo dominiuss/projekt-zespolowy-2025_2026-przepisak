@@ -27,16 +27,16 @@ namespace PrzepisakApi.src.Features.Recipes.Api
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<RecipeOverviewDTO>>> GetAllRecipes()
+        public async Task<ActionResult<List<RecipeOverviewDTO>>> GetAllRecipes([FromQuery] ViewAllRecipesQuery query)
         {
-            var result = await _mediator.Send(new ViewAllRecipesQuery());
+            var result = await _mediator.Send(query);
             return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<RecipeDTO>> GetRecipeById([FromRoute] int id)
         {
-            var query = new ViewRecipeQuery { Id= id };
+            var query = new ViewRecipeQuery { Id = id };
             var result = await _mediator.Send(query);
             if (result == null)
                 return NotFound();
