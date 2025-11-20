@@ -19,40 +19,47 @@ namespace PrzepisakApi.src.Database
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(EfContext).Assembly);
         }
-        public void SeedData(UserManager<IdentityUser> userManager)
+
+        public async Task SeedData(UserManager<IdentityUser> userManager)
         {
             if (!Users.Any())
             {
                 var adminIdentity = new IdentityUser { UserName = "admin"};
                 var chefIdentity = new IdentityUser { UserName = "chef"};
 
-                userManager.CreateAsync(adminIdentity, "Password123!").Wait();
-                userManager.CreateAsync(chefIdentity, "Password123!").Wait();
+                if (await userManager.FindByNameAsync("admin") == null)
+                    await userManager.CreateAsync(adminIdentity, "Password123!");
 
-                Users.Add(new User
-                {
-                    IdentityUserId = adminIdentity.Id
-                });
+                if (await userManager.FindByNameAsync("chef") == null)
+                    await userManager.CreateAsync(chefIdentity, "Password123!");
 
-                Users.Add(new User
-                {
-                    IdentityUserId = chefIdentity.Id
-                });
+                var adminCreated = await userManager.FindByNameAsync("admin");
+                var chefCreated = await userManager.FindByNameAsync("chef");
 
-                SaveChanges();
+                await SaveChangesAsync();
             }
 
             if (!Categories.Any())
             {
-                Categories.Add(new Category { Id = 1, Name = "Dessert", ParentCategoryId = null });
-                Categories.Add(new Category { Id = 2, Name = "Main Course", ParentCategoryId = null });
-                SaveChanges();
+                Categories.Add(new Category { Name = "Dessert", ParentCategoryId = null });
+                Categories.Add(new Category { Name = "Main Course", ParentCategoryId = null });
+                Categories.Add(new Category { Name = "Breakfast", ParentCategoryId = null });
+                Categories.Add(new Category { Name = "Soup", ParentCategoryId = null });
+                Categories.Add(new Category { Name = "Vegetarian", ParentCategoryId = null });
+                await SaveChangesAsync();
             }
 
             if (!Recipes.Any())
             {
-                var adminUser = Users.First(u => u.IdentityUserId ==
-                    userManager.Users.First(x => x.UserName == "admin").Id);
+                var adminUser = await Users.FirstAsync(u => u.IdentityUser.UserName == "admin");
+                var chefUser = await Users.FirstAsync(u => u.IdentityUser.UserName == "chef");
+
+                var catDessert = await Categories.FirstAsync(c => c.Name == "Dessert");
+                var catMain = await Categories.FirstAsync(c => c.Name == "Main Course");
+                var catBreakfast = await Categories.FirstAsync(c => c.Name == "Breakfast");
+                var catSoup = await Categories.FirstAsync(c => c.Name == "Soup");
+                var catVege = await Categories.FirstAsync(c => c.Name == "Vegetarian");
+
                 Recipes.Add(new Recipe
                 {
                     Title = "Chocolate Cake",
@@ -62,16 +69,79 @@ namespace PrzepisakApi.src.Database
                     PreparationTime = 30,
                     CookTime = 45,
                     Servings = 8,
-                    CategoryId = Categories.First(c => c.Name == "Dessert").Id,
+                    CategoryId = catDessert.Id,
                     Cuisine = "International",
                     ImageUrl = "",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 });
 
-                SaveChanges();
+                Recipes.Add(new Recipe
+                {
+                    Title = "Spaghetti Bolognese",
+                    AuthorId = chefUser.Id,
+                    Description = "Classic Italian pasta with meat sauce",
+                    Instructions = "Cook pasta. Prepare sauce with beef and tomatoes. Mix.",
+                    PreparationTime = 20,
+                    CookTime = 40,
+                    Servings = 4,
+                    CategoryId = catMain.Id,
+                    Cuisine = "Italian",
+                    ImageUrl = "",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+
+                Recipes.Add(new Recipe
+                {
+                    Title = "Tomato Soup",
+                    AuthorId = chefUser.Id,
+                    Description = "Creamy tomato soup with basil",
+                    Instructions = "Roast tomatoes. Blend with broth and cream.",
+                    PreparationTime = 10,
+                    CookTime = 30,
+                    Servings = 4,
+                    CategoryId = catSoup.Id,
+                    Cuisine = "International",
+                    ImageUrl = "",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+
+                Recipes.Add(new Recipe
+                {
+                    Title = "Scrambled Eggs",
+                    AuthorId = adminUser.Id,
+                    Description = "Fluffy eggs with chives",
+                    Instructions = "Whisk eggs. Fry on butter. Add salt.",
+                    PreparationTime = 5,
+                    CookTime = 5,
+                    Servings = 1,
+                    CategoryId = catBreakfast.Id,
+                    Cuisine = "Polish",
+                    ImageUrl = "",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+
+                Recipes.Add(new Recipe
+                {
+                    Title = "Grilled Tofu Salad",
+                    AuthorId = chefUser.Id,
+                    Description = "Healthy salad with tofu and veggies",
+                    Instructions = "Grill tofu. Chop veggies. Mix with dressing.",
+                    PreparationTime = 15,
+                    CookTime = 10,
+                    Servings = 2,
+                    CategoryId = catVege.Id,
+                    Cuisine = "Vegan",
+                    ImageUrl = "",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+
+                await SaveChangesAsync();
             }
         }
-
     }
 }

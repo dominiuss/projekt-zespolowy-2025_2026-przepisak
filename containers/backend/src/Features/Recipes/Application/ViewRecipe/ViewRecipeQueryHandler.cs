@@ -12,6 +12,7 @@ namespace PrzepisakApi.src.Features.Recipes.Application.ViewRecipe
         {
             _recipeRepository = recipeRepository;
         }
+
         public async Task<RecipeDTO> Handle(ViewRecipeQuery request, CancellationToken cancellationToken)
         {
             var recipe = await _recipeRepository.GetRecipeByIdAsync(request.Id);

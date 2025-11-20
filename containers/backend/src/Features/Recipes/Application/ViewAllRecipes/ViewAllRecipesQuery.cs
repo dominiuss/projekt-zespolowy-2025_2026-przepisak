@@ -5,5 +5,6 @@ namespace PrzepisakApi.src.Features.Recipes.Application.ViewAllRecipes
 {
     public class ViewAllRecipesQuery : IRequest<List<RecipeOverviewDTO>>
     {
+        public List<int>? CategoryIds { get; set; }
     }
 }
