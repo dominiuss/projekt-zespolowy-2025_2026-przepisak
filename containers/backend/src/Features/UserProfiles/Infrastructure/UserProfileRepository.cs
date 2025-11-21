@@ -15,16 +15,14 @@ namespace PrzepisakApi.src.Features.UserProfile.Infrastructure
 
         public async Task<User?> GetByUserIdAsync(int userId, CancellationToken ct = default)
         {
-            return await _db.Users.FirstOrDefaultAsync(x => x.Id == userId, ct);
+            return await _db.Users
+                .Include(x => x.IdentityUser)
+                .FirstOrDefaultAsync(x => x.Id == userId, ct);
         }
 
         public async Task<User> CreateForUserAsync(int userId, CancellationToken ct = default)
         {
-            var user = new User
-            {
-                Id = userId,
-            };
-
+            var user = new User { Id = userId };
             await _db.Users.AddAsync(user, ct);
             return user;
         }

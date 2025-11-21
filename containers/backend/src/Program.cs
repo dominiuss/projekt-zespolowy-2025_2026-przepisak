@@ -101,13 +101,15 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
 var app = builder.Build();
+
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<EfContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>(); //seeding
     dbContext.Database.EnsureCreated();
-    dbContext.SeedData(userManager); //seeding
+    await dbContext.SeedData(userManager); //seeding
 }
+
 
 if (app.Environment.IsDevelopment())
 {

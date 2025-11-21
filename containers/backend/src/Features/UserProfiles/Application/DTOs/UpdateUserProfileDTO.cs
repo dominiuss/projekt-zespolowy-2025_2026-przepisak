@@ -1,9 +1,8 @@
 ﻿namespace PrzepisakApi.src.Features.UserProfiles.Application.DTOs
 {
-    public class UserProfileDTO
+    public class UpdateProfileRequestDto
     {
-        public int Id { get; set; }
-        public string Username { get; set; }
+        public string username { get; set; }
         public string? Bio { get; set; }
         public string? AvatarUrl { get; set; }
     }
