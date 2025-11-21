@@ -28,6 +28,11 @@ namespace PrzepisakApi.src.Features.UserProfile.Infrastructure
                    .WithMany()
                    .HasForeignKey(u => u.IdentityUserId)
                    .IsRequired();
+            builder.OwnsOne(u => u.RefreshToken, rt =>
+            {
+                rt.Property(r => r.Token).HasColumnName("refresh_token").HasMaxLength(200);
+                rt.Property(r => r.RefreshTokenExpiration).HasColumnName("refresh_token_expiration");
+            });
 
         }
     }

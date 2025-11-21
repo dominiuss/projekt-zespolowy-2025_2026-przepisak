@@ -1,42 +1,49 @@
-﻿//using MediatR;
-//using Microsoft.AspNetCore.Identity;
-//using miejsce.api.src.Data;
-//using miejsce.api.src.Features.Common;
-//using Microsoft.EntityFrameworkCore;
-//using miejsce.api.src.Features.Auth.Services;
-//using miejsce.api.src.Features.Auth.Application.DTOs;
+﻿using MediatR;
+using PrzepisakApi.api.src.Features.Auth.Application.DTOs;
+using PrzepisakApi.api.src.Features.Auth.Services;
+using PrzepisakApi.src.Features.Auth.Domain;
 
-//namespace PrzepisakApi.api.src.Features.Auth.Application.Login;
+namespace PrzepisakApi.api.src.Features.Auth.Application.Login;
 
-//public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
-//{
-//    private readonly IEfContext _efContext;
-//    private readonly UserManager<IdentityUser> _userManager;
-//    private readonly ITokenService _tokenService;
+public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
+{
+    private readonly ITokenService _tokenService;
+    private readonly IUserRepository _userRepository;
 
-//    public LoginCommandHandler(IEfContext efContext, UserManager<IdentityUser> userManager, ITokenService tokenService)
-//    {
-//        _efContext = efContext;
-//        _userManager = userManager;
-//        _tokenService = tokenService;
-//    }
+    public LoginCommandHandler(ITokenService tokenService, IUserRepository userRepository)
+    {
+        _tokenService = tokenService;
+        _userRepository = userRepository;
+    }
 
-//    public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
-//    {
-//        var user = await _userManager.FindByEmailAsync(request.Username);
-//        //if (!user.EmailConfirmed)
-//        //    return Result<LoginResponse>.Failure(new List<string> { "Account not confirmed." });
+    public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
+    {
+        var user = await _userRepository.GetUserByUsernameAsync(request.Username);
+        if (user == null)
+            return new LoginResponse
+            {
+                ErrorMessage = "Nieprawidłowa nazwa użytkownika lub/i hasło"
+            };
 
-//        var profile = await _efContext.UserProfiles.FirstOrDefaultAsync(up=>up.IdentityId==user.Id);
+        var passwordValid = await _userRepository.CheckPasswordAsync(user, request.Password);
+        if (!passwordValid)
+            return new LoginResponse
+            {
+                ErrorMessage = "Nieprawidłowa nazwa użytkownika lub/i hasło"
+            };
 
-//        var tokenResponse = await _tokenService.GenerateTokensAsync(user, profile.Id);
-//        var response = new LoginResponse
-//        {
-//            Token = tokenResponse.AccessToken,
-//            RefreshToken = tokenResponse.RefreshToken,
-//            Expiration = DateTime.UtcNow.AddHours(2)
-//        };
+        var profile = await _userRepository.GetUserProfileAsync(user.Id);
+        if (profile == null)
+            return null;
 
-//        return response;
-//    }
-//}
+        var tokenResponse = await _tokenService.GenerateTokensAsync(user, profile.Id);
+
+        return new LoginResponse
+        {
+            Token = tokenResponse.AccessToken,
+            RefreshToken = tokenResponse.RefreshToken,
+            Expiration = DateTime.UtcNow.AddHours(2),
+            ErrorMessage = null
+        };
+    }
+}
