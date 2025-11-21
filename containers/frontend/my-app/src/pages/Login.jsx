@@ -16,19 +16,26 @@ export default function Login() {
       const res = await fetch("http://10.6.57.161:5035/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (!res.ok) {
-        const msg = await res.text();
-        alert("Błąd logowania: " + msg);
+        const msg = await res.json().catch(() => ({}));
+
+        if (msg?.ErrorMessage) {
+          alert("Błąd logowania: " + msg.ErrorMessage);
+        } else {
+          alert("Nieprawidłowe dane logowania");
+        }
         return;
       }
 
       const data = await res.json();
-      localStorage.setItem("token", data.token);
-      navigate("/"); // przekierowanie na stronę główną po loginie
 
+      // zapis access tokenu
+      localStorage.setItem("token", data.token);
+
+      navigate("/"); // przekierowanie na stronę główną po loginie
     } catch (err) {
       alert("Błąd połączenia z backendem");
     }
@@ -43,7 +50,7 @@ export default function Login() {
 
         <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           <input
-            name="userName"
+            name="username"
             placeholder="Nazwa użytkownika"
             onChange={handleChange}
             className="p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
