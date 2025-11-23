@@ -54,7 +54,7 @@ test-containers:
   image: docker:cli
   variables:
     DOCKER_HOST: unix:///var/run/docker.sock
-    script:
+  script:
     # Test frontend → nazwa usługi z compose: web
     - echo "Test frontendu (web)..."
     - docker exec frontend-przepisak curl -sSf http://localhost:5000 || echo "Frontend nie działa"
