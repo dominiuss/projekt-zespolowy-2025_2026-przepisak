@@ -16,9 +16,9 @@ stages:
 build-containers:
   stage: build
   image: docker:cli
-  artifacts:
-    paths:
-      - /git/
+#  artifacts:
+#    paths:
+#      - /git/
   variables:
     DOCKER_HOST: unix:///var/run/docker.sock
   before_script:
@@ -54,6 +54,9 @@ test-containers:
   image: docker:cli
   variables:
     DOCKER_HOST: unix:///var/run/docker.sock
+  before_script:
+    # docker:cli jest alpine, więc instalujemy compose
+    - apk add --no-cache curl
   script:
     # Test frontend → nazwa usługi z compose: web
     - echo "Test frontendu (web)..."
