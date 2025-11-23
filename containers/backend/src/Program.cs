@@ -21,6 +21,8 @@ using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.Recipes.Infrastructure;
 using PrzepisakApi.src.Features.UserProfile.Domain;
 using PrzepisakApi.src.Features.UserProfile.Infrastructure;
+using PrzepisakApi.src.Features.Ratings.Domain;
+using PrzepisakApi.src.Features.Ratings.Infrastructure;
 using Scalar.AspNetCore;
 using System.Reflection;
 using System.Text;
@@ -96,6 +98,7 @@ builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));

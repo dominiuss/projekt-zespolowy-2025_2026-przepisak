@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.UserProfile.Domain;
+using PrzepisakApi.src.Features.Ratings.Domain;
 
 namespace PrzepisakApi.src.Database
 {
@@ -9,6 +10,7 @@ namespace PrzepisakApi.src.Database
         DbSet<Recipe> Recipes { get; set; }
         DbSet<Category> Categories { get; set; }
         DbSet<User> Users { get; set; }
+        DbSet<Rating> Ratings { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

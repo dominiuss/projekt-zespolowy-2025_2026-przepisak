@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.UserProfile.Domain;
+using PrzepisakApi.src.Features.Ratings.Domain;
 
 namespace PrzepisakApi.src.Database
 {
@@ -14,6 +15,8 @@ namespace PrzepisakApi.src.Database
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -24,8 +27,8 @@ namespace PrzepisakApi.src.Database
         {
             if (!Users.Any())
             {
-                var adminIdentity = new IdentityUser { UserName = "admin"};
-                var chefIdentity = new IdentityUser { UserName = "chef"};
+                var adminIdentity = new IdentityUser { UserName = "admin" };
+                var chefIdentity = new IdentityUser { UserName = "chef" };
 
                 if (await userManager.FindByNameAsync("admin") == null)
                     await userManager.CreateAsync(adminIdentity, "Password123!");
@@ -35,6 +38,22 @@ namespace PrzepisakApi.src.Database
 
                 var adminCreated = await userManager.FindByNameAsync("admin");
                 var chefCreated = await userManager.FindByNameAsync("chef");
+
+                var adminProfile = new User
+                {
+                    IdentityUserId = adminCreated.Id,
+                    Bio = "Admin",
+                    AvatarUrl = ""
+                };
+                Users.Add(adminProfile);
+
+                var chefProfile = new User
+                {
+                    IdentityUserId = chefCreated.Id,
+                    Bio = "Chef",
+                    AvatarUrl = ""
+                };
+                Users.Add(chefProfile);
 
                 await SaveChangesAsync();
             }

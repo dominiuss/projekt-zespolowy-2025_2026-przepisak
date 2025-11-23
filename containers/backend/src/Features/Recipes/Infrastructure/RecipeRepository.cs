@@ -2,6 +2,7 @@
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.Recipes.Application.DTOs;
 using Dapper;
+using Microsoft.EntityFrameworkCore; // Potrzebne do Include/EF
 
 namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 {
@@ -22,10 +23,13 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 
             var sql = @"
                 SELECT 
+                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
-                    r.image_url AS ImageUrl
+                    r.image_url AS ImageUrl,
+                    (SELECT COALESCE(AVG(rt.score), 0) FROM ratings rt WHERE rt.recipe_id = r.id) AS AverageRating,
+                    (SELECT COUNT(rt.id) FROM ratings rt WHERE rt.recipe_id = r.id) AS RatingsCount
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
                 JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
@@ -49,6 +53,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
                 SELECT 
+                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -60,7 +65,9 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
                     r.cuisine AS Cuisine,
                     r.image_url AS ImageUrl,
                     r.created_at AS CreatedAt,
-                    r.updated_at AS UpdatedAt
+                    r.updated_at AS UpdatedAt,
+                    (SELECT COALESCE(AVG(rt.score), 0) FROM ratings rt WHERE rt.recipe_id = r.id) AS AverageRating,
+                    (SELECT COUNT(rt.id) FROM ratings rt WHERE rt.recipe_id = r.id) AS RatingsCount
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
                 JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
@@ -76,14 +83,17 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
                 SELECT 
+                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
-                    r.image_url AS ImageUrl
+                    r.image_url AS ImageUrl,
+                    (SELECT COALESCE(AVG(rt.score), 0) FROM ratings rt WHERE rt.recipe_id = r.id) AS AverageRating,
+                    (SELECT COUNT(rt.id) FROM ratings rt WHERE rt.recipe_id = r.id) AS RatingsCount
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
                 JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
-                WHERE r.title LIKE @Title
+                WHERE r.title ILIKE @Title 
                 ORDER BY r.created_at DESC;
             ";
             var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, new { Title = $"%{title}%" });
@@ -95,14 +105,17 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
                 SELECT 
+                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
-                    r.image_url AS ImageUrl
+                    r.image_url AS ImageUrl,
+                    (SELECT COALESCE(AVG(rt.score), 0) FROM ratings rt WHERE rt.recipe_id = r.id) AS AverageRating,
+                    (SELECT COUNT(rt.id) FROM ratings rt WHERE rt.recipe_id = r.id) AS RatingsCount
                 FROM recipes r
                 JOIN users u ON u.id = r.author_id
                 JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
-                WHERE iu.""UserName"" LIKE @AuthorName
+                WHERE iu.""UserName"" ILIKE @AuthorName
                 ORDER BY r.created_at DESC;
             ";
             var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, new { AuthorName = $"%{name}%" });
