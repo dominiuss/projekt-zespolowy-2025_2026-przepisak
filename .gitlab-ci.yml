@@ -10,11 +10,15 @@
 #    - docker info
 #    - docker run hello-world
 stages:
+  - build
   - test
 
 test-containers:
-  stage: test
+  stage: build
   image: docker:cli
+  artifacts:
+    paths:
+      - /git/
   variables:
     DOCKER_HOST: unix:///var/run/docker.sock
   before_script:
@@ -45,6 +49,12 @@ test-containers:
     # Czekanie na wszystkie kontenery
     - for c in $containers; do wait_for_container $c; done
 
+test-containers:
+  stage: test
+  image: docker:cli
+  variables:
+    DOCKER_HOST: unix:///var/run/docker.sock
+    script:
     # Test frontend → nazwa usługi z compose: web
     - echo "Test frontendu (web)..."
     - docker exec frontend-przepisak curl -sSf http://localhost:5000 || echo "Frontend nie działa"
