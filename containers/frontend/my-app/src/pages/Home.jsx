@@ -94,13 +94,13 @@ export default function Home() {
               className="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-105 transform transition block"
             >
               <img
-                src={recipe.image || "https://via.placeholder.com/400x300"}
+                src={recipe.imageUrl || "https://via.placeholder.com/400x300"}
                 alt={recipe.title}
                 className="w-full h-48 object-cover"
               />
               <div className="p-4">
                 <h2 className="text-xl font-semibold mb-1">{recipe.title}</h2>
-                <p className="text-sm text-gray-500 mb-2">Autor: {recipe.author}</p>
+                <p className="text-sm text-gray-500 mb-2">Autor: {recipe.authorName}</p>
                 <p className="text-gray-600">{recipe.description}</p>
               </div>
             </Link>
