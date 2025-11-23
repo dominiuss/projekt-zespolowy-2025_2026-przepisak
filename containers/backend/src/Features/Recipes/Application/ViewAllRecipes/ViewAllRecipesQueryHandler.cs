@@ -15,7 +15,7 @@ namespace PrzepisakApi.src.Features.Recipes.Application.ViewAllRecipes
 
         public async Task<List<RecipeOverviewDTO>> Handle(ViewAllRecipesQuery request, CancellationToken cancellationToken)
         {
-            var recipes = await _recipeRepository.GetAllRecipesAsync(request.CategoryIds);
+            var recipes = await _recipeRepository.GetAllRecipesAsync(request.CategoryIds,request.IncludeIngredientIds,request.ExcludeIngredientIds);
 
             return recipes;
         }

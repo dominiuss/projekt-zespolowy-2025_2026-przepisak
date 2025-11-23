@@ -15,5 +15,6 @@
         public string CategoryName { get; set; }
         public string Cuisine { get; set; }
         public string ImageUrl { get; set; }
+        public List<AddUpdateRecipeIngredientDTO> RecipeIngredients { get; set; } = new();
     }
 }
