@@ -2,7 +2,7 @@
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.Recipes.Application.DTOs;
 using Dapper;
-using Microsoft.EntityFrameworkCore; // Potrzebne do Include/EF
+using Microsoft.EntityFrameworkCore;
 
 namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 {
@@ -23,7 +23,6 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 
             var sql = @"
                 SELECT 
-                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -53,7 +52,6 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
                 SELECT 
-                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -83,7 +81,6 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
                 SELECT 
-                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -105,7 +102,6 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
                 SELECT 
-                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,

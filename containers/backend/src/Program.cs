@@ -6,10 +6,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-// Dodane przez Rafała
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+// Dodane przez Rafała
+using Microsoft.OpenApi;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using PrzepisakApi.api.src.Features.Auth.Infrastructure.Options;
 using PrzepisakApi.api.src.Features.Auth.Services;
@@ -55,6 +55,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection(nameof(JwtSettings)));
 

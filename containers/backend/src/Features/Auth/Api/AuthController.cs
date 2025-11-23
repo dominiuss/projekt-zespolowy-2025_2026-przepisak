@@ -10,9 +10,11 @@ using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using FluentValidation;
 using ValidationException = FluentValidation.ValidationException;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PrzepisakApi.src.Features.Auth.Api
 {
+    [AllowAnonymous]
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
