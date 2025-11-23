@@ -9,6 +9,7 @@ namespace PrzepisakApi.src.Database
         DbSet<Recipe> Recipes { get; set; }
         DbSet<Category> Categories { get; set; }
         DbSet<User> Users { get; set; }
+        DbSet<Ingredient> Ingredients { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

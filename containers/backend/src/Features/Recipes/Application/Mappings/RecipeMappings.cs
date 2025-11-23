@@ -10,10 +10,9 @@ namespace PrzepisakApi.src.Features.Recipes.Application.Mappings
     {
         public static void RegisterMappings()
         {
+            // DTO → AddRecipeCommand
             TypeAdapterConfig<AddUpdateRecipeDTO, AddRecipeCommand>.NewConfig()
                 .Map(dest => dest.Title, src => src.Title)
-                .Map(dest => dest.AuthorId, src => src.AuthorId)
-                .Map(dest => dest.AuthorName, src => src.AuthorName)
                 .Map(dest => dest.Description, src => src.Description)
                 .Map(dest => dest.Instructions, src => src.Instructions)
                 .Map(dest => dest.PreparationTime, src => src.PreparationTime)
@@ -24,10 +23,10 @@ namespace PrzepisakApi.src.Features.Recipes.Application.Mappings
                 .Map(dest => dest.Cuisine, src => src.Cuisine)
                 .Map(dest => dest.ImageUrl, src => src.ImageUrl);
 
+            // AddRecipeCommand → Recipe
             TypeAdapterConfig<AddRecipeCommand, Recipe>.NewConfig()
                 .Ignore(dest => dest.Id)
                 .Map(dest => dest.Title, src => src.Title)
-                .Map(dest => dest.AuthorId, src => src.AuthorId)
                 .Map(dest => dest.Description, src => src.Description)
                 .Map(dest => dest.Instructions, src => src.Instructions)
                 .Map(dest => dest.PreparationTime, src => src.PreparationTime)
@@ -36,12 +35,12 @@ namespace PrzepisakApi.src.Features.Recipes.Application.Mappings
                 .Map(dest => dest.CategoryId, src => src.CategoryId)
                 .Map(dest => dest.Cuisine, src => src.Cuisine)
                 .Map(dest => dest.ImageUrl, src => src.ImageUrl)
-                .Map(dest => dest.CreatedAt, src => DateTime.UtcNow)
-                .Map(dest => dest.UpdatedAt, src => DateTime.UtcNow);
+                .Map(dest => dest.CreatedAt, _ => DateTime.UtcNow)
+                .Map(dest => dest.UpdatedAt, _ => DateTime.UtcNow);
 
+            // Recipe → DTO
             TypeAdapterConfig<Recipe, AddUpdateRecipeDTO>.NewConfig()
                 .Map(dest => dest.Id, src => src.Id)
-                .Map(dest => dest.AuthorName, src => src.Author != null ? src.Author.IdentityUser.UserName : null)
                 .Map(dest => dest.CategoryName, src => src.Category != null ? src.Category.Name : null)
                 .Map(dest => dest.Title, src => src.Title)
                 .Map(dest => dest.Description, src => src.Description)
@@ -54,10 +53,10 @@ namespace PrzepisakApi.src.Features.Recipes.Application.Mappings
                 .Map(dest => dest.ImageUrl, src => src.ImageUrl)
                 .Map(dest => dest.AuthorId, src => src.AuthorId);
 
+            // UpdateRecipeCommand → Recipe
             TypeAdapterConfig<UpdateRecipeCommand, Recipe>.NewConfig()
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Title, src => src.Title)
-                .Map(dest => dest.AuthorId, src => src.AuthorId)
                 .Map(dest => dest.Description, src => src.Description)
                 .Map(dest => dest.Instructions, src => src.Instructions)
                 .Map(dest => dest.PreparationTime, src => src.PreparationTime)
@@ -66,8 +65,6 @@ namespace PrzepisakApi.src.Features.Recipes.Application.Mappings
                 .Map(dest => dest.CategoryId, src => src.CategoryId)
                 .Map(dest => dest.Cuisine, src => src.Cuisine)
                 .Map(dest => dest.ImageUrl, src => src.ImageUrl);
-
-
         }
     }
 }
