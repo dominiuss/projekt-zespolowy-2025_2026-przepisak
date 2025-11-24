@@ -27,8 +27,7 @@ lint_backend:
   script:
     - cd containers/backend
     - mkdir -p obj/Release/net10.0 bin/Release/net10.0
-    #- dotnet tool install -g dotnet-format
-    - dotnet tool install -g dotnet-code-quality
+    - dotnet tool install -g dotnet-format
     - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet clean PrzepisakApi.csproj
     - dotnet nuget locals all --clear
