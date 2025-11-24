@@ -101,7 +101,7 @@ test-backend:
 
 build-containers:
   stage: build
-  image: docker:20.10 #mcr.microsoft.com/dotnet/sdk:10.0
+  image: docker:cli #mcr.microsoft.com/dotnet/sdk:10.0
   script:
 #    - cd containers/backend
 #    - mkdir -p obj/Release/net10.0 bin/Release/net10.0
@@ -130,7 +130,7 @@ build-containers:
 
 deploy-containers:
   stage: deploy
-  image: docker:20.10 #node:20
+  image: docker:cli #node:20
   cache:
     paths:
       - containers/frontend/my-app/node_modules/
