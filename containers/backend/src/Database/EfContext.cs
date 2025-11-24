@@ -14,7 +14,7 @@ namespace PrzepisakApi.src.Database
         }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<User> Users { get; set; }
+        public new DbSet<User> Users { get; set; }
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<Ingredient> Ingredients { get; set; }
 
@@ -133,7 +133,7 @@ namespace PrzepisakApi.src.Database
                         Servings = 8,
                         CategoryId = catDessert.Id,
                         Cuisine = "International",
-                        ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/0/04/Pound_layer_cake.jpg",
+                        ImageUrl = "https://sallysbakingaddiction.com/wp-content/uploads/2013/04/triple-chocolate-cake-4.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         RecipeIngredients = new List<RecipeIngredient>
@@ -157,7 +157,7 @@ namespace PrzepisakApi.src.Database
                         Servings = 4,
                         CategoryId = catMain.Id,
                         Cuisine = "Italian",
-                        ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/2/2a/Spaghetti_al_Pomodoro.JPG",
+                        ImageUrl = "https://az.przepisy.pl/www-przepisy-pl/www.przepisy.pl/przepisy3ii/img/variants/800x0/proste-spaghetti-bolognese.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         RecipeIngredients = new List<RecipeIngredient>
@@ -181,7 +181,7 @@ namespace PrzepisakApi.src.Database
                         Servings = 4,
                         CategoryId = catSoup.Id,
                         Cuisine = "French",
-                        ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Tomato_soup.jpg/800px-Tomato_soup.jpg",
+                        ImageUrl = "https://www.happyfoodstube.com/wp-content/uploads/2020/03/creamy-tomato-basil-soup-image.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         RecipeIngredients = new List<RecipeIngredient>
@@ -205,7 +205,7 @@ namespace PrzepisakApi.src.Database
                         Servings = 2,
                         CategoryId = catBreakfast.Id,
                         Cuisine = "American",
-                        ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/2/20/Scrambled_eggs.jpg",
+                        ImageUrl = "https://healthyrecipesblogs.com/wp-content/uploads/2025/01/fluffy-scrambled-eggs-featured-new-2024.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         RecipeIngredients = new List<RecipeIngredient>
@@ -228,7 +228,7 @@ namespace PrzepisakApi.src.Database
                         Servings = 2,
                         CategoryId = catVege.Id,
                         Cuisine = "Asian Fusion",
-                        ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Tofu_salad.jpg/640px-Tofu_salad.jpg",
+                        ImageUrl = "https://www.myplantifulcooking.com/wp-content/uploads/2022/04/japanese-tofu-salad-featured.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         RecipeIngredients = new List<RecipeIngredient>
@@ -251,7 +251,7 @@ namespace PrzepisakApi.src.Database
                         Servings = 2,
                         CategoryId = catMain.Id,
                         Cuisine = "Italian",
-                        ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/f/f0/Spaghetti_aglio%2C_olio_e_peperoncino_%2816284859030%29.jpg",
+                        ImageUrl = "https://tarasmulticulturaltable.com/wp-content/uploads/2019/04/Pasta-with-Garlic-Butter-Sauce-4-of-4.jpg",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         RecipeIngredients = new List<RecipeIngredient>
