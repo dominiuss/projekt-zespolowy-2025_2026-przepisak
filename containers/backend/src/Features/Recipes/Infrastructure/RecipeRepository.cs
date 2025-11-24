@@ -102,7 +102,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 
             return result.ToList();
         }
-
+/*
         public async Task<List<RecipeIngredientDTO>> GetAllIngredientsAsync()
         {
             using var connection = _dapperContext.CreateConnection();
@@ -117,7 +117,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             var result = await connection.QueryAsync<RecipeIngredientDTO>(sql);
             return result.ToList();
         }
-
+*/
         public async Task<RecipeDTO> GetRecipeByIdAsync(int id)
         {
             using var connection = _dapperContext.CreateConnection();
