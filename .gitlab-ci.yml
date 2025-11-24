@@ -126,7 +126,7 @@ test-backend:
 
 code_quality:
   stage: test
-  image: docker:28.0.5
+  image: docker:cli
   variables:
     DOCKER_API_VERSION: "1.44"
   artifacts:
