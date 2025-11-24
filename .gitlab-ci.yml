@@ -110,7 +110,7 @@ migrate-backend:
     - dotnet tool install --global dotnet-ef
     - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet restore containers/backend/PrzepisakApi.csproj
-    - dotnet build PrzepisakApi.csproj --no-restore
+    - dotnet build containers/backend/PrzepisakApi.csproj --no-restore
     - dotnet ef database update --project containers/backend/PrzepisakApi.csproj
 #  only:
 #    - main
