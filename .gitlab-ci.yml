@@ -111,13 +111,14 @@ test-backend:
   image: mcr.microsoft.com/dotnet/sdk:10.0
   script:
     - mkdir -p containers/backend/TestResults
-    - rm -f containers/backend/*.sarif
+    - rm -f containers/backend/codequality
+    - mkdir -p containers/backend/codequality
     - cd containers/backend
     - dotnet tool install -g dotnet-format
     - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet restore PrzepisakApi.csproj
     - dotnet build PrzepisakApi.csproj --configuration Release
-    - dotnet format PrzepisakApi.csproj --verify-no-changes --report gl-code-quality-report.sarif || true
+    - dotnet format PrzepisakApi.csproj --verify-no-changes --report codequality || true
     - dotnet test PrzepisakApi.csproj --logger "trx;LogFileName=test-results.trx"
     - ls -al
     - pwd
@@ -125,10 +126,10 @@ test-backend:
     when: always
     reports:
       junit: containers/backend/test-results.trx
-      codequality: containers/backend/gl-code-quality-report.sarif
+      codequality: containers/backend/codequality/format.sarif
     paths:
       - containers/backend/test-result.trx
-      - containers/backend/gl-code-quality-report.sarif
+      - containers/backend/codequality/format.sarif
 
 #code_quality:
 #  stage: test
