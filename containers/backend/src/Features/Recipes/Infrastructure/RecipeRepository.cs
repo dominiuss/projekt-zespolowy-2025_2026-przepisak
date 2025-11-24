@@ -23,6 +23,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 
             var sql = @"
                 SELECT 
+                    r.id as Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -51,7 +52,8 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         {
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
-                SELECT 
+                SELECT
+                    r.id as Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -81,6 +83,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
                 SELECT 
+                    r.id as Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -102,6 +105,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
                 SELECT 
+                    r.id as Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
