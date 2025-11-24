@@ -128,8 +128,5 @@ code_quality:
   image: docker:28.0.5
   variables:
     DOCKER_API_VERSION: "1.44"
-  needs:
-    - lint_backend
-    - lint_frontend
   artifacts:
     paths: [gl-code-quality-report.json]
