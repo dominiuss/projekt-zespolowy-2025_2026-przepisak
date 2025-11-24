@@ -1,5 +1,8 @@
-﻿namespace PrzepisakApi.src.Features.Ratings.Application.DTOs
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace PrzepisakApi.src.Features.Ratings.Application.DTOs
 {
+    [ExcludeFromCodeCoverage]
     public class AddRatingDTO
     {
         public int RecipeId { get; set; }

@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using PrzepisakApi.src.Features.Ratings.Domain;
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.UserProfile.Domain;
-using PrzepisakApi.src.Features.Ratings.Domain;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PrzepisakApi.src.Database
 {
+    [ExcludeFromCodeCoverage]
     public class EfContext : IdentityDbContext<IdentityUser>, IEfContext
     {
         public EfContext(DbContextOptions<EfContext> options) : base(options)

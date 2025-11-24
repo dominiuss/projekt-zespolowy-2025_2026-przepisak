@@ -5,6 +5,7 @@ using PrzepisakApi.src.Features.Ratings.Domain;
 
 namespace PrzepisakApi.src.Database
 {
+
     public interface IEfContext
     {
         DbSet<Recipe> Recipes { get; set; }

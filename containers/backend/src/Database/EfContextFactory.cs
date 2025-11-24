@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using PrzepisakApi.src.Database;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
+using PrzepisakApi.src.Database;
+using System.Diagnostics.CodeAnalysis;
 
 
 namespace miejsce.api.src.Data
 {
+    [ExcludeFromCodeCoverage]
     public class EfContextFactory : IDesignTimeDbContextFactory<EfContext>
     {
         public EfContext CreateDbContext(string[] args)

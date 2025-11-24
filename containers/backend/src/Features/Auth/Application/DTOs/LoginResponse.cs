@@ -1,5 +1,7 @@
-﻿namespace PrzepisakApi.api.src.Features.Auth.Application.DTOs;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace PrzepisakApi.api.src.Features.Auth.Application.DTOs;
+[ExcludeFromCodeCoverage]
 public class LoginResponse
 {
     public string? Token { get; set; }
