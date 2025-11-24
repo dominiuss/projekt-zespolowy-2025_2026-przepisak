@@ -93,7 +93,21 @@ test-backend:
       - containers/backend/test-result.trx
       - containers/backend/codequality/format-report.json
 
-
+migrate-backend:
+  stage: migrate
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  services:
+    - name: postgres:18
+      alias: db
+      command: ["postgres", "-c", "listen_addresses='*'"]
+      ports:
+        - 5432:5432
+  variables:
+    ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=przepisak;Username=student;Password=wcy"
+  script:
+    - dotnet ef database update --project containers/backend/PrzepisakApi.csproj
+#  only:
+#    - main
 
 # ===============================
 #       BUILD BACKEND
