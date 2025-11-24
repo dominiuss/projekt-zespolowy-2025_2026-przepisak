@@ -104,6 +104,8 @@ migrate-backend:
   variables:
     ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=przepisak;Username=student;Password=wcy"
   script:
+    - dotnet tool install --global dotnet-ef
+    - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet ef database update --project containers/backend/PrzepisakApi.csproj
 #  only:
 #    - main
