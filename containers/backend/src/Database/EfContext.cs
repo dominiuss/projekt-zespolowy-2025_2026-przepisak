@@ -14,13 +14,10 @@ namespace PrzepisakApi.src.Database
         }
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<User> Users { get; set; }
-<<<<<<< HEAD
+        public new DbSet<User> Users { get; set; }
         public DbSet<Rating> Ratings { get; set; }
-
-=======
         public DbSet<Ingredient> Ingredients { get; set; }
->>>>>>> f627f48032be820809713083c5a7e22687c44da2
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -29,17 +26,10 @@ namespace PrzepisakApi.src.Database
 
         public async Task SeedData(UserManager<IdentityUser> userManager)
         {
-            // 1. NAPRAWA: Seedowanie użytkowników domenowych (User)
             if (!Users.Any())
             {
-<<<<<<< HEAD
-                var adminIdentity = new IdentityUser { UserName = "admin" };
-                var chefIdentity = new IdentityUser { UserName = "chef" };
-=======
-                // A. Tworzenie kont Identity (Logowanie)
                 var adminIdentity = new IdentityUser { UserName = "admin", Email = "admin@test.com" };
                 var chefIdentity = new IdentityUser { UserName = "chef", Email = "chef@test.com" };
->>>>>>> f627f48032be820809713083c5a7e22687c44da2
 
                 if (await userManager.FindByNameAsync("admin") == null)
                     await userManager.CreateAsync(adminIdentity, "Password123!");
@@ -47,36 +37,14 @@ namespace PrzepisakApi.src.Database
                 if (await userManager.FindByNameAsync("chef") == null)
                     await userManager.CreateAsync(chefIdentity, "Password123!");
 
-                // Pobierz utworzone IdentityUser, aby mieć ich GUID
                 var adminCreated = await userManager.FindByNameAsync("admin");
                 var chefCreated = await userManager.FindByNameAsync("chef");
 
-<<<<<<< HEAD
-                var adminProfile = new User
-                {
-                    IdentityUserId = adminCreated.Id,
-                    Bio = "Admin",
-                    AvatarUrl = ""
-                };
-                Users.Add(adminProfile);
-
-                var chefProfile = new User
-                {
-                    IdentityUserId = chefCreated.Id,
-                    Bio = "Chef",
-                    AvatarUrl = ""
-                };
-                Users.Add(chefProfile);
-
-=======
-                // B. Tworzenie encji domenowych User (Profil w aplikacji)
-                // To jest krok, którego brakowało!
                 var usersList = new List<User>
                 {
                     new User
                     {
-                        IdentityUserId = adminCreated.Id, // Łączymy kluczem obcym
-                        // Ustaw inne wymagane pola User, jeśli istnieją
+                        IdentityUserId = adminCreated.Id,
                     },
                     new User
                     {
@@ -85,11 +53,9 @@ namespace PrzepisakApi.src.Database
                 };
 
                 Users.AddRange(usersList);
->>>>>>> f627f48032be820809713083c5a7e22687c44da2
                 await SaveChangesAsync();
             }
 
-            // 2. Seedowanie Składników (Bez zmian, działało poprawnie)
             if (!Ingredients.Any())
             {
                 Ingredients.AddRange(new List<Ingredient>
@@ -115,7 +81,6 @@ namespace PrzepisakApi.src.Database
                 await SaveChangesAsync();
             }
 
-            // 3. Seedowanie Kategorii (Bez zmian)
             if (!Categories.Any())
             {
                 Categories.Add(new Category { Name = "Dessert", ParentCategoryId = null });
@@ -126,10 +91,8 @@ namespace PrzepisakApi.src.Database
                 await SaveChangesAsync();
             }
 
-            // 4. Seedowanie Przepisów
             if (!Recipes.Any())
             {
-                // Teraz to zadziała, bo Users.FirstAsync znajdzie rekordy dodane w kroku 1
                 var adminUser = await Users.Include(u => u.IdentityUser).FirstAsync(u => u.IdentityUser.UserName == "admin");
                 var chefUser = await Users.Include(u => u.IdentityUser).FirstAsync(u => u.IdentityUser.UserName == "chef");
 
@@ -157,57 +120,151 @@ namespace PrzepisakApi.src.Database
                 var lettuce = await Ingredients.FirstAsync(i => i.Name == "Lettuce");
                 var cucumber = await Ingredients.FirstAsync(i => i.Name == "Cucumber");
 
-                Recipes.Add(new Recipe
+                var recipesToAdd = new List<Recipe>
                 {
-                    Title = "Chocolate Cake",
-                    AuthorId = adminUser.Id, // Tu był błąd: adminUser nie istniał w tabeli Users
-                    Description = "Delicious chocolate cake",
-                    Instructions = "Mix ingredients and bake",
-                    PreparationTime = 30,
-                    CookTime = 45,
-                    Servings = 8,
-                    CategoryId = catDessert.Id,
-                    Cuisine = "International",
-                    ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/0/04/Pound_layer_cake.jpg", // Dodaj przykładowe URL
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    RecipeIngredients = new List<RecipeIngredient>
+                    new Recipe
                     {
-                        new RecipeIngredient { Ingredient = flour, Quantity = "2 cups" },
-                        new RecipeIngredient { Ingredient = sugar, Quantity = "1.5 cups" },
-                        new RecipeIngredient { Ingredient = cocoa, Quantity = "0.5 cup" },
-                        new RecipeIngredient { Ingredient = eggs, Quantity = "2 pcs" },
-                        new RecipeIngredient { Ingredient = milk, Quantity = "1 cup" }
-                    }
-                });
+                        Title = "Chocolate Cake",
+                        AuthorId = adminUser.Id,
+                        Description = "Delicious and moist chocolate cake perfect for birthdays.",
+                        Instructions = "1. Mix dry ingredients. 2. Add wet ingredients. 3. Bake at 180C for 45 mins.",
+                        PreparationTime = 30,
+                        CookTime = 45,
+                        Servings = 8,
+                        CategoryId = catDessert.Id,
+                        Cuisine = "International",
+                        ImageUrl = "https://sallysbakingaddiction.com/wp-content/uploads/2013/04/triple-chocolate-cake-4.jpg",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        RecipeIngredients = new List<RecipeIngredient>
+                        {
+                            new RecipeIngredient { Ingredient = flour, Quantity = "2 cups" },
+                            new RecipeIngredient { Ingredient = sugar, Quantity = "1.5 cups" },
+                            new RecipeIngredient { Ingredient = cocoa, Quantity = "0.5 cup" },
+                            new RecipeIngredient { Ingredient = eggs, Quantity = "2 pcs" },
+                            new RecipeIngredient { Ingredient = milk, Quantity = "1 cup" }
+                        }
+                    },
 
-                // ... Pozostałe przepisy bez zmian (skopiuj z poprzedniej odpowiedzi) ...
-                // Dla czytelności skróciłem tutaj kod, ale wklej tu resztę przepisów.
-
-                // Przykład drugiego dla pewności:
-                Recipes.Add(new Recipe
-                {
-                    Title = "Spaghetti Bolognese",
-                    AuthorId = chefUser.Id,
-                    Description = "Classic Italian pasta",
-                    Instructions = "Cook pasta...",
-                    PreparationTime = 20,
-                    CookTime = 40,
-                    Servings = 4,
-                    CategoryId = catMain.Id,
-                    Cuisine = "Italian",
-                    ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/2/2a/Spaghetti_al_Pomodoro.JPG",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    RecipeIngredients = new List<RecipeIngredient>
+                    new Recipe
                     {
-                        new RecipeIngredient { Ingredient = pasta, Quantity = "500g" },
-                        new RecipeIngredient { Ingredient = beef, Quantity = "400g" },
-                        new RecipeIngredient { Ingredient = tomatoes, Quantity = "1 can" },
-                        new RecipeIngredient { Ingredient = onion, Quantity = "1 pc" }
-                    }
-                });
+                        Title = "Spaghetti Bolognese",
+                        AuthorId = chefUser.Id,
+                        Description = "Classic Italian pasta with rich meat sauce.",
+                        Instructions = "1. Cook beef with onions. 2. Add tomatoes and simmer. 3. Serve over boiled pasta.",
+                        PreparationTime = 20,
+                        CookTime = 40,
+                        Servings = 4,
+                        CategoryId = catMain.Id,
+                        Cuisine = "Italian",
+                        ImageUrl = "https://az.przepisy.pl/www-przepisy-pl/www.przepisy.pl/przepisy3ii/img/variants/800x0/proste-spaghetti-bolognese.jpg",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        RecipeIngredients = new List<RecipeIngredient>
+                        {
+                            new RecipeIngredient { Ingredient = pasta, Quantity = "500g" },
+                            new RecipeIngredient { Ingredient = beef, Quantity = "400g" },
+                            new RecipeIngredient { Ingredient = tomatoes, Quantity = "1 can" },
+                            new RecipeIngredient { Ingredient = onion, Quantity = "1 pc" },
+                            new RecipeIngredient { Ingredient = garlic, Quantity = "2 cloves" }
+                        }
+                    },
 
+                    new Recipe
+                    {
+                        Title = "Creamy Tomato Soup",
+                        AuthorId = adminUser.Id,
+                        Description = "Warming soup made with fresh tomatoes and cream.",
+                        Instructions = "1. Sauté onions and garlic. 2. Add tomatoes and cook. 3. Blend and add cream.",
+                        PreparationTime = 15,
+                        CookTime = 25,
+                        Servings = 4,
+                        CategoryId = catSoup.Id,
+                        Cuisine = "French",
+                        ImageUrl = "https://www.happyfoodstube.com/wp-content/uploads/2020/03/creamy-tomato-basil-soup-image.jpg",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        RecipeIngredients = new List<RecipeIngredient>
+                        {
+                            new RecipeIngredient { Ingredient = tomatoes, Quantity = "1kg" },
+                            new RecipeIngredient { Ingredient = onion, Quantity = "1 pc" },
+                            new RecipeIngredient { Ingredient = garlic, Quantity = "2 cloves" },
+                            new RecipeIngredient { Ingredient = cream, Quantity = "100ml" },
+                            new RecipeIngredient { Ingredient = basil, Quantity = "Fresh leaves" }
+                        }
+                    },
+
+                    new Recipe
+                    {
+                        Title = "Fluffy Scrambled Eggs",
+                        AuthorId = chefUser.Id,
+                        Description = "Perfect breakfast eggs with chives.",
+                        Instructions = "1. Whisk eggs with milk. 2. Melt butter on pan. 3. Cook gently and top with chives.",
+                        PreparationTime = 5,
+                        CookTime = 5,
+                        Servings = 2,
+                        CategoryId = catBreakfast.Id,
+                        Cuisine = "American",
+                        ImageUrl = "https://healthyrecipesblogs.com/wp-content/uploads/2025/01/fluffy-scrambled-eggs-featured-new-2024.jpg",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        RecipeIngredients = new List<RecipeIngredient>
+                        {
+                            new RecipeIngredient { Ingredient = eggs, Quantity = "4 pcs" },
+                            new RecipeIngredient { Ingredient = milk, Quantity = "2 tbsp" },
+                            new RecipeIngredient { Ingredient = butter, Quantity = "1 tbsp" },
+                            new RecipeIngredient { Ingredient = chives, Quantity = "Chopped" }
+                        }
+                    },
+
+                    new Recipe
+                    {
+                        Title = "Fresh Tofu Salad",
+                        AuthorId = adminUser.Id,
+                        Description = "Healthy and crisp salad with marinated tofu.",
+                        Instructions = "1. Cube tofu. 2. Chop vegetables. 3. Toss everything together.",
+                        PreparationTime = 15,
+                        CookTime = 0,
+                        Servings = 2,
+                        CategoryId = catVege.Id,
+                        Cuisine = "Asian Fusion",
+                        ImageUrl = "https://www.myplantifulcooking.com/wp-content/uploads/2022/04/japanese-tofu-salad-featured.jpg",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        RecipeIngredients = new List<RecipeIngredient>
+                        {
+                            new RecipeIngredient { Ingredient = tofu, Quantity = "200g" },
+                            new RecipeIngredient { Ingredient = lettuce, Quantity = "1 head" },
+                            new RecipeIngredient { Ingredient = cucumber, Quantity = "1 pc" },
+                            new RecipeIngredient { Ingredient = onion, Quantity = "0.5 pc" }
+                        }
+                    },
+
+                    new Recipe
+                    {
+                        Title = "Garlic Butter Pasta",
+                        AuthorId = chefUser.Id,
+                        Description = "Simple yet delicious pasta dish.",
+                        Instructions = "1. Boil pasta. 2. Sauté garlic in butter. 3. Mix pasta with sauce and herbs.",
+                        PreparationTime = 10,
+                        CookTime = 15,
+                        Servings = 2,
+                        CategoryId = catMain.Id,
+                        Cuisine = "Italian",
+                        ImageUrl = "https://tarasmulticulturaltable.com/wp-content/uploads/2019/04/Pasta-with-Garlic-Butter-Sauce-4-of-4.jpg",
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
+                        RecipeIngredients = new List<RecipeIngredient>
+                        {
+                            new RecipeIngredient { Ingredient = pasta, Quantity = "300g" },
+                            new RecipeIngredient { Ingredient = butter, Quantity = "50g" },
+                            new RecipeIngredient { Ingredient = garlic, Quantity = "3 cloves" },
+                            new RecipeIngredient { Ingredient = basil, Quantity = "Handful" }
+                        }
+                    }
+                };
+
+                Recipes.AddRange(recipesToAdd);
                 await SaveChangesAsync();
             }
         }
