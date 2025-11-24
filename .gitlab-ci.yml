@@ -32,7 +32,7 @@ lint_backend:
     - dotnet format PrzepisakApi.csproj
     - dotnet clean
     - dotnet nuget locals all --clear
-    - dotnet build --configuration Release
+    - dotnet build PrzepisakApi.csproj --configuration Release
   only:
     - merge_requests
     - branches
