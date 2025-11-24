@@ -36,7 +36,7 @@ export default function Login() {
       localStorage.setItem("token", data.token);
 
       navigate("/"); // przekierowanie na stronę główną po loginie
-    } catch (_err) {
+    } catch (err) {
       alert("Błąd połączenia z backendem");
     }
   };

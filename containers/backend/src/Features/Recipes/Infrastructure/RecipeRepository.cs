@@ -2,6 +2,7 @@
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.Recipes.Application.DTOs;
 using Dapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 {
@@ -16,12 +17,14 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             _dapperContext = dapperContext;
         }
 
-        public async Task<List<RecipeOverviewDTO>> GetAllRecipesAsync(List<int>? categoryIds = null)
+        public async Task<List<RecipeOverviewDTO>> GetAllRecipesAsync(List<int>? categoryIds = null, List<int>? includedIngredientIds = null,
+            List<int>? excludedIngredientIds = null)
         {
             using var connection = _dapperContext.CreateConnection();
 
             var sql = @"
                 SELECT 
+                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -31,15 +34,40 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
                 JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
                 WHERE 1=1 
             ";
-
+            var parameters = new DynamicParameters();
             if (categoryIds != null && categoryIds.Any())
             {
                 sql += " AND r.category_id = ANY(@CategoryIds)";
+                parameters.Add("CategoryIds", categoryIds.ToArray());
+            }
+
+            if (includedIngredientIds != null && includedIngredientIds.Any())
+            {
+                sql += @"
+                    AND r.id IN (
+                        SELECT ri.recipe_id
+                        FROM recipe_ingredients ri
+                        WHERE ri.ingredient_id = ANY(@IncludedIds)
+                        GROUP BY ri.recipe_id
+                        HAVING COUNT(DISTINCT ri.ingredient_id) = @IncludedCount)";
+                parameters.Add("IncludedIds", includedIngredientIds.ToArray());
+                parameters.Add("IncludedCount", includedIngredientIds.Count());
+            }
+            if (excludedIngredientIds != null && excludedIngredientIds.Any())
+            {
+                sql += @"
+                        AND r.id NOT IN (
+                            SELECT ri.recipe_id 
+                            FROM recipe_ingredients ri
+                            WHERE ri.ingredient_id = ANY(@ExcludedIds)
+                        )";
+
+                parameters.Add("ExcludedIds", excludedIngredientIds.ToArray());
             }
 
             sql += " ORDER BY r.created_at DESC;";
 
-            var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, new { CategoryIds = categoryIds?.ToArray() });
+            var result = await connection.QueryAsync<RecipeOverviewDTO>(sql, parameters);
 
             return result.ToList();
         }
@@ -47,8 +75,11 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         public async Task<RecipeDTO> GetRecipeByIdAsync(int id)
         {
             using var connection = _dapperContext.CreateConnection();
-            var sql = @"
+
+            // 1. Pobranie podstawowych danych przepisu
+            var sqlRecipe = @"
                 SELECT 
+                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -67,8 +98,27 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
                 LEFT JOIN categories c ON c.id = r.category_id
                 WHERE r.id=@Id;
             ";
-            var result = await connection.QuerySingleOrDefaultAsync<RecipeDTO>(sql, new { Id = id });
-            return result;
+
+            var recipe = await connection.QuerySingleOrDefaultAsync<RecipeDTO>(sqlRecipe, new { Id = id });
+
+            if (recipe == null) return null;
+
+            // 2. Pobranie składników
+            var sqlIngredients = @"
+                SELECT 
+                    ri.ingredient_id AS IngredientId,
+                    i.name AS Name,
+                    ri.quantity AS Quantity
+                FROM recipe_ingredients ri
+                JOIN ingredients i ON i.id = ri.ingredient_id
+                WHERE ri.recipe_id = @Id
+            ";
+
+            var ingredients = await connection.QueryAsync<AddUpdateRecipeIngredientDTO>(sqlIngredients, new { Id = id });
+
+            recipe.RecipeIngredients = ingredients.ToList();
+
+            return recipe;
         }
 
         public async Task<List<RecipeOverviewDTO>> SearchRecipesByTitleAsync(string title)
@@ -76,6 +126,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
                 SELECT 
+                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -95,6 +146,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             using var connection = _dapperContext.CreateConnection();
             var sql = @"
                 SELECT 
+                    r.id AS Id,
                     r.title AS Title,
                     iu.""UserName"" AS AuthorName,
                     r.description AS Description,
@@ -117,7 +169,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 
         public Recipe Update(Recipe recipe)
         {
-            var existingRecipe = _efContext.Recipes.FirstOrDefault(r => r.Id == recipe.Id);
+            var existingRecipe = _efContext.Recipes.Include(recipe => recipe.RecipeIngredients).FirstOrDefault(r => r.Id == recipe.Id);
             if (existingRecipe == null) return null;
 
             existingRecipe.Title = recipe.Title;
@@ -131,6 +183,17 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             existingRecipe.AuthorId = recipe.AuthorId;
             existingRecipe.CategoryId = recipe.CategoryId;
             existingRecipe.UpdatedAt = DateTime.UtcNow;
+
+            existingRecipe.RecipeIngredients.Clear();
+
+            if (recipe.RecipeIngredients != null)
+            {
+                foreach (var ingredient in recipe.RecipeIngredients)
+                {
+                    existingRecipe.RecipeIngredients.Add(ingredient);
+                }
+            }
+
             return existingRecipe;
         }
 
@@ -138,6 +201,15 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         {
             var recipe = _efContext.Recipes.FirstOrDefault(x => x.Id == id);
             if (recipe != null) _efContext.Recipes.Remove(recipe);
+        }
+
+        public async Task<List<RecipeIngredientDTO>> GetAllIngredientsAsync()
+        {
+            using var connection = _dapperContext.CreateConnection();
+            var sql = "SELECT id AS Id, name AS Name FROM ingredients ORDER BY name ASC";
+
+            var result = await connection.QueryAsync<RecipeIngredientDTO>(sql);
+            return result.ToList();
         }
     }
 }

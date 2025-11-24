@@ -13,7 +13,7 @@ export default function Home() {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://10.6.57.161:5035/api");
+        const res = await fetch("http://10.6.57.161:5035/api/recipes");
         if (!res.ok) throw new Error("Błąd pobierania danych");
         const data = await res.json();
         setRecipes(data);
@@ -37,8 +37,8 @@ export default function Home() {
     setLoading(true);
     try {
       const [byNameRes, byTitleRes] = await Promise.all([
-        fetch(`http://10.6.57.161:5035/api/search/name?query=${search}`),
-        fetch(`http://10.6.57.161:5035/api/search/title?query=${search}`)
+        fetch(`http://10.6.57.161:5035/api/recipes/search/name?query=${search}`),
+        fetch(`http://10.6.57.161:5035/api/recipes/search/title?query=${search}`)
       ]);
 
       if (!byNameRes.ok || !byTitleRes.ok) throw new Error("Błąd wyszukiwania");
@@ -110,4 +110,5 @@ export default function Home() {
       )}
     </div>
   );
+  
 }

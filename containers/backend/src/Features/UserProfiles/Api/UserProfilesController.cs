@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrzepisakApi.src.Features.UserProfile.Application.GetUserProfile;
 using PrzepisakApi.src.Features.UserProfile.Application.UpdateUserProfile;
@@ -26,7 +27,7 @@ namespace PrzepisakApi.src.Features.UserProfile.Api
 
             return int.Parse(idClaim.Value);
         }
-
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<UserProfileDTO>> Get()
         {
@@ -42,6 +43,7 @@ namespace PrzepisakApi.src.Features.UserProfile.Api
         }
 
         [HttpPut]
+        [Authorize]
         public async Task<ActionResult<UserProfileDTO>> Update([FromBody] UpdateProfileRequestDto dto)
         {
             var userId = GetCurrentUserId();
