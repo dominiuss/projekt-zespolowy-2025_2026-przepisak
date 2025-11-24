@@ -100,12 +100,17 @@ migrate-backend:
   services:
     - name: postgres:18
       alias: db
-      command: ["postgres", "-c", "listen_addresses='*'"]
+  variables:
+    POSTGRES_USER: student
+    POSTGRES_PASSWORD: wcy
+    POSTGRES_DB: przepisak
   variables:
     ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=przepisak;Username=student;Password=wcy"
   script:
     - dotnet tool install --global dotnet-ef
     - export PATH="$PATH:/root/.dotnet/tools"
+    - dotnet restore containers/backend/PrzepisakApi.csproj
+    - dotnet build PrzepisakApi.csproj --no-restore
     - dotnet ef database update --project containers/backend/PrzepisakApi.csproj
 #  only:
 #    - main
