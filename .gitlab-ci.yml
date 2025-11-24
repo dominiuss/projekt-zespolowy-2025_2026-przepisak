@@ -7,6 +7,7 @@ stages:
 variables:
   DOTNET_CLI_TELEMETRY_OPTOUT: "1"
   NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
+  DOCKER_HOST: unix:///var/run/docker.sock
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -111,7 +112,7 @@ test-backend:
   artifacts:
     when: always
     reports:
-      junit: containers/backend/TestResults/test-results.trx.trx
+      junit: containers/backend/TestResults/test-results.trx
     paths:
       - containers/backend/TestResults/test-results.trx
 
