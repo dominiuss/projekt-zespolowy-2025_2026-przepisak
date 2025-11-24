@@ -116,7 +116,7 @@ test-backend:
     - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet restore PrzepisakApi.csproj
     - dotnet build PrzepisakApi.csproj --configuration Release
-    - dotnet format --verify-no-changes --report gl-code-quality-report.sarif
+    - dotnet format PrzepisakApi.csproj --verify-no-changes --report gl-code-quality-report.sarif
     - dotnet test PrzepisakApi.csproj --logger "trx;LogFileName=test-results.trx"
     - ls -al
     - pwd
