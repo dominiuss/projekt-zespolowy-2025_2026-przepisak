@@ -111,6 +111,7 @@ test-backend:
   image: mcr.microsoft.com/dotnet/sdk:10.0
   script:
     - mkdir -p containers/backend/TestResults
+    - rm -f containers/backend/*.sarif
     - cd containers/backend
     - dotnet tool install -g dotnet-format
     - export PATH="$PATH:/root/.dotnet/tools"
