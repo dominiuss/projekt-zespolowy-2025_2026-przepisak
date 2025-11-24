@@ -16,6 +16,11 @@ namespace PrzepisakApi.src.Features.Recipes.Application.DTOs
         public string ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+<<<<<<< HEAD
+        public double AverageRating { get; set; }
+        public int RatingsCount { get; set; }
+=======
         public List<AddUpdateRecipeIngredientDTO> RecipeIngredients { get; set; } = new();
+>>>>>>> f627f48032be820809713083c5a7e22687c44da2
     }
 }

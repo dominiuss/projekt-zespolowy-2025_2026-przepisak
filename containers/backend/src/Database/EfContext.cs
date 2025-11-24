@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.UserProfile.Domain;
+using PrzepisakApi.src.Features.Ratings.Domain;
 
 namespace PrzepisakApi.src.Database
 {
@@ -14,7 +15,12 @@ namespace PrzepisakApi.src.Database
         public DbSet<Recipe> Recipes { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<User> Users { get; set; }
+<<<<<<< HEAD
+        public DbSet<Rating> Ratings { get; set; }
+
+=======
         public DbSet<Ingredient> Ingredients { get; set; }
+>>>>>>> f627f48032be820809713083c5a7e22687c44da2
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -26,9 +32,14 @@ namespace PrzepisakApi.src.Database
             // 1. NAPRAWA: Seedowanie użytkowników domenowych (User)
             if (!Users.Any())
             {
+<<<<<<< HEAD
+                var adminIdentity = new IdentityUser { UserName = "admin" };
+                var chefIdentity = new IdentityUser { UserName = "chef" };
+=======
                 // A. Tworzenie kont Identity (Logowanie)
                 var adminIdentity = new IdentityUser { UserName = "admin", Email = "admin@test.com" };
                 var chefIdentity = new IdentityUser { UserName = "chef", Email = "chef@test.com" };
+>>>>>>> f627f48032be820809713083c5a7e22687c44da2
 
                 if (await userManager.FindByNameAsync("admin") == null)
                     await userManager.CreateAsync(adminIdentity, "Password123!");
@@ -40,6 +51,24 @@ namespace PrzepisakApi.src.Database
                 var adminCreated = await userManager.FindByNameAsync("admin");
                 var chefCreated = await userManager.FindByNameAsync("chef");
 
+<<<<<<< HEAD
+                var adminProfile = new User
+                {
+                    IdentityUserId = adminCreated.Id,
+                    Bio = "Admin",
+                    AvatarUrl = ""
+                };
+                Users.Add(adminProfile);
+
+                var chefProfile = new User
+                {
+                    IdentityUserId = chefCreated.Id,
+                    Bio = "Chef",
+                    AvatarUrl = ""
+                };
+                Users.Add(chefProfile);
+
+=======
                 // B. Tworzenie encji domenowych User (Profil w aplikacji)
                 // To jest krok, którego brakowało!
                 var usersList = new List<User>
@@ -56,6 +85,7 @@ namespace PrzepisakApi.src.Database
                 };
 
                 Users.AddRange(usersList);
+>>>>>>> f627f48032be820809713083c5a7e22687c44da2
                 await SaveChangesAsync();
             }
 
