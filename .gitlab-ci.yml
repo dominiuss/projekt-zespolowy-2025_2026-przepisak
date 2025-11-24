@@ -102,9 +102,10 @@ test-backend:
   stage: test
   image: mcr.microsoft.com/dotnet/sdk:10.0
   script:
+    - mkdir -p containers/backend/TestResults
     - cd containers/backend
     - dotnet restore PrzepisakApi.csproj
-    - dotnet test PrzepisakApi.csproj --no-build --logger "trx;LogFileName=test-results.trx"
+    - dotnet test PrzepisakApi.csproj --no-build --logger "trx;LogFileName=TestResults/test-results.trx"
   artifacts:
     when: always
     reports:
