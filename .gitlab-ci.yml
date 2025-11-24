@@ -9,8 +9,9 @@ variables:
   NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
 
 cache:
+  key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - .nuget/packages/
+    - containers/backend/.nuget/packages/
 
 include:
   - template: Code-Quality.gitlab-ci.yml   # automatyczny raport Code Climate
@@ -22,18 +23,15 @@ include:
 lint_backend:
   stage: lint
   image: mcr.microsoft.com/dotnet/sdk:10.0
-  before_script:
-  - mkdir -p containers/backend/obj/Release/net10.0
-  - mkdir -p containers/backend/bin/Release/net10.0
   script:
     - cd containers/backend
+    - mkdir -p obj/Release/net10.0 bin/Release/net10.0
     - dotnet tool install -g dotnet-format
     - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet clean PrzepisakApi.csproj
     - dotnet nuget locals all --clear
     - dotnet restore PrzepisakApi.csproj
-    - dotnet format PrzepisakApi.csproj
-    - dotnet build PrzepisakApi.csproj --configuration Release
+    - dotnet format PrzepisakApi.csproj --verify-no-changes
   allow_failure: false
   artifacts:
     reports:
