@@ -112,7 +112,7 @@ test-backend:
     - cd containers/backend
     - dotnet restore PrzepisakApi.csproj
     - dotnet test PrzepisakApi.csproj --no-build --logger "trx;LogFileName=TestResults/test-results.trx"
-    - ls -l TestResults/
+    - ls -al
     - pwd
   artifacts:
     when: always
@@ -123,7 +123,7 @@ test-backend:
 
 code_quality:
   stage: test
-  image: docker:latest
+  image: docker:29.0.2
   needs:
     - lint_backend
     - lint_frontend
