@@ -26,6 +26,7 @@ namespace PrzepisakApi.src.Database
 
         public async Task SeedData(UserManager<IdentityUser> userManager)
         {
+            // 1. NAPRAWA: Seedowanie użytkowników domenowych (User)
             if (!Users.Any())
             {
                 var adminIdentity = new IdentityUser { UserName = "admin", Email = "admin@test.com" };
@@ -37,6 +38,7 @@ namespace PrzepisakApi.src.Database
                 if (await userManager.FindByNameAsync("chef") == null)
                     await userManager.CreateAsync(chefIdentity, "Password123!");
 
+                // Pobierz utworzone IdentityUser, aby mieć ich GUID
                 var adminCreated = await userManager.FindByNameAsync("admin");
                 var chefCreated = await userManager.FindByNameAsync("chef");
 
@@ -81,6 +83,33 @@ namespace PrzepisakApi.src.Database
                 await SaveChangesAsync();
             }
 
+            // 2. Seedowanie Składników (Bez zmian, działało poprawnie)
+            if (!Ingredients.Any())
+            {
+                Ingredients.AddRange(new List<Ingredient>
+                {
+                    new Ingredient { Name = "Flour" },
+                    new Ingredient { Name = "Sugar" },
+                    new Ingredient { Name = "Cocoa Powder" },
+                    new Ingredient { Name = "Eggs" },
+                    new Ingredient { Name = "Milk" },
+                    new Ingredient { Name = "Pasta" },
+                    new Ingredient { Name = "Ground Beef" },
+                    new Ingredient { Name = "Tomatoes" },
+                    new Ingredient { Name = "Onion" },
+                    new Ingredient { Name = "Garlic" },
+                    new Ingredient { Name = "Heavy Cream" },
+                    new Ingredient { Name = "Basil" },
+                    new Ingredient { Name = "Butter" },
+                    new Ingredient { Name = "Chives" },
+                    new Ingredient { Name = "Tofu" },
+                    new Ingredient { Name = "Lettuce" },
+                    new Ingredient { Name = "Cucumber" }
+                });
+                await SaveChangesAsync();
+            }
+
+            // 3. Seedowanie Kategorii (Bez zmian)
             if (!Categories.Any())
             {
                 Categories.Add(new Category { Name = "Dessert", ParentCategoryId = null });
@@ -91,6 +120,7 @@ namespace PrzepisakApi.src.Database
                 await SaveChangesAsync();
             }
 
+            // 4. Seedowanie Przepisów
             if (!Recipes.Any())
             {
                 var adminUser = await Users.Include(u => u.IdentityUser).FirstAsync(u => u.IdentityUser.UserName == "admin");
