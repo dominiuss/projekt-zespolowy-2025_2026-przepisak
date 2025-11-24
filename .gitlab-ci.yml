@@ -101,8 +101,6 @@ migrate-backend:
     - name: postgres:18
       alias: db
       command: ["postgres", "-c", "listen_addresses='*'"]
-      ports:
-        - 5432:5432
   variables:
     ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=przepisak;Username=student;Password=wcy"
   script:
