@@ -1,5 +1,8 @@
-﻿namespace PrzepisakApi.src.Features.Recipes.Application.DTOs
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace PrzepisakApi.src.Features.Recipes.Application.DTOs
 {
+    [ExcludeFromCodeCoverage]
     public class RecipeIngredientDTO
     {
         public int Id { get; set; }

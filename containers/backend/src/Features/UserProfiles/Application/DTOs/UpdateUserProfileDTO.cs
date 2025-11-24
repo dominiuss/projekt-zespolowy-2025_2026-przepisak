@@ -1,5 +1,8 @@
-﻿namespace PrzepisakApi.src.Features.UserProfiles.Application.DTOs
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace PrzepisakApi.src.Features.UserProfiles.Application.DTOs
 {
+    [ExcludeFromCodeCoverage]
     public class UpdateProfileRequestDto
     {
         public string username { get; set; }

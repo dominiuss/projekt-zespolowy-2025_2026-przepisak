@@ -19,9 +19,10 @@ namespace PrzepisakApi.src.Database
     }
 }
 */
-using System.Data;
 using Npgsql;
-
+using System.Data;
+using System.Diagnostics.CodeAnalysis;
+[ExcludeFromCodeCoverage]
 public class DapperContext
 {
     private readonly string _connectionString;

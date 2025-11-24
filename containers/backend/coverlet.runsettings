@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>json,cobertura,lcov,opencover</Format>
+          
+          <Exclude>[PrzepisakApi]PrzepisakApi.Migrations.*,[PrzepisakApi]PrzepisakApi.src.Database.*,[PrzepisakApi]*.DTOs.*,[PrzepisakApi]*.Infrastructure.*Configuration,[PrzepisakApi]PrzepisakApi.src.Features.Auth.Infrastructure.Options.*,[PrzepisakApi]PrzepisakApi.api.src.Features.Auth.Infrastructure.Options.*</Exclude>
+          
+          <ExcludeByFile>**/Migrations/*.cs,**/*Snapshot.cs,**/Program.cs</ExcludeByFile>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
