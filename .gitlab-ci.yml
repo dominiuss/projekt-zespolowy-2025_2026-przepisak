@@ -8,15 +8,15 @@ variables:
   DOTNET_CLI_TELEMETRY_OPTOUT: "1"
   NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
   DOCKER_HOST: unix:///var/run/docker.sock
-  CL_USE_LOCAL_SCANNERS: "true"
+#  CL_USE_LOCAL_SCANNERS: "true"
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - containers/backend/.nuget/packages/
 
-include:
-  - template: Code-Quality.gitlab-ci.yml   # automatyczny raport Code Climate
+#include:
+#  - template: Code-Quality.gitlab-ci.yml   # automatyczny raport Code Climate
 
 # ===============================
 #   BACKEND LINT (.NET 10 RC2)
@@ -112,8 +112,11 @@ test-backend:
   script:
     - mkdir -p containers/backend/TestResults
     - cd containers/backend
+    - dotnet tool install -g dotnet-format
+    - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet restore PrzepisakApi.csproj
     - dotnet build PrzepisakApi.csproj --configuration Release
+    - dotnet format --verify-no-changes --report gl-code-quality-report.sarif
     - dotnet test PrzepisakApi.csproj --logger "trx;LogFileName=test-results.trx"
     - ls -al
     - pwd
@@ -121,13 +124,15 @@ test-backend:
     when: always
     reports:
       junit: containers/backend/test-results.trx
+      codequality: containers/backend/gl-code-quality-report.sarif
     paths:
-      - containers/backend/
+      - containers/backend/test-result.trx
+      - containers/backend/gl-code-quality-report.sarif
 
-code_quality:
-  stage: test
-  image: docker:cli
-  variables:
-    DOCKER_API_VERSION: "1.44"
-  artifacts:
-    paths: [gl-code-quality-report.json]
+#code_quality:
+#  stage: test
+#  image: docker:cli
+#  variables:
+#    DOCKER_API_VERSION: "1.44"
+#  artifacts:
+#    paths: [gl-code-quality-report.json]
