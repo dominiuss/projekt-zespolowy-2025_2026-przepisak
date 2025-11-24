@@ -122,7 +122,7 @@ test-backend:
 
 code_quality:
   stage: test
-  image: docker:24.0.5
+  image: docker:latest
   needs:
     - lint_backend
     - lint_frontend
