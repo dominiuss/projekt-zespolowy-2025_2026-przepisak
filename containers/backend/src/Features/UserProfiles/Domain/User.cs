@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PrzepisakApi.src.Features.UserProfiles.Domain;
+using PrzepisakApi.src.Features.Ratings.Domain;
 
 namespace PrzepisakApi.src.Features.UserProfile.Domain
 {
@@ -11,5 +12,6 @@ namespace PrzepisakApi.src.Features.UserProfile.Domain
         public string? Bio { get; set; }
         public string? AvatarUrl { get; set; }
         public RefreshToken RefreshToken { get; set; } = null!;
+        public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
     }
 }

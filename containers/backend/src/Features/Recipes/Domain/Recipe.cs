@@ -1,4 +1,5 @@
 ﻿using PrzepisakApi.src.Features.UserProfile.Domain;
+using PrzepisakApi.src.Features.Ratings.Domain;
 
 namespace PrzepisakApi.src.Features.Recipes.Domain
 {
@@ -20,5 +21,6 @@ namespace PrzepisakApi.src.Features.Recipes.Domain
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public ICollection<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();
+        public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
     }
 }
