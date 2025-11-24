@@ -111,14 +111,15 @@ test-backend:
     - mkdir -p containers/backend/TestResults
     - cd containers/backend
     - dotnet restore PrzepisakApi.csproj
-    - dotnet test PrzepisakApi.csproj --no-build --logger "trx;LogFileName=$(pwd)/TestResults/test-results.trx"
+    - dotnet test PrzepisakApi.csproj --no-build --logger "trx;LogFileName=TestResults/test-results.trx"
     - ls -l TestResults/
+    - pwd
   artifacts:
     when: always
     reports:
-      junit: TestResults/test-results.trx
+      junit: containers/backend/TestResults/test-results.trx
     paths:
-      - TestResults/test-results.trx
+      - containers/backend/TestResults/
 
 code_quality:
   stage: test
