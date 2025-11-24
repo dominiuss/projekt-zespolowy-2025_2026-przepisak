@@ -26,19 +26,20 @@ lint_backend:
   image: mcr.microsoft.com/dotnet/sdk:10.0
   script:
     - cd containers/backend
+    - rm -f gl-code-quality-report.json
     - mkdir -p obj/Release/net10.0 bin/Release/net10.0
     - dotnet tool install -g dotnet-format
     - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet clean PrzepisakApi.csproj
     - dotnet nuget locals all --clear
     - dotnet restore PrzepisakApi.csproj
-    - dotnet format PrzepisakApi.csproj --verify-no-changes --report containers/backend/gl-code-quality-report.sarif || true
+    - dotnet format PrzepisakApi.csproj --verify-no-changes --report $(pwd)/gl-code-quality-report.json || true
 
     #- dotnet format PrzepisakApi.csproj --report ./gl-code-quality-report.json
   allow_failure: false
   artifacts:
     reports:
-      codequality: containers/backend/gl-code-quality-report.sarif
+      codequality: $(pwd)/gl-code-quality-report.json
   only:
     - merge_requests
     - branches
@@ -110,7 +111,8 @@ test-backend:
     - mkdir -p containers/backend/TestResults
     - cd containers/backend
     - dotnet restore PrzepisakApi.csproj
-    - dotnet test PrzepisakApi.csproj --no-build --logger "trx;LogFileName=TestResults/test-results.trx"
+    - dotnet test PrzepisakApi.csproj --no-build --logger "trx;LogFileName=$(pwd)/TestResults/test-results.trx"
+    - ls -l TestResults/
   artifacts:
     when: always
     reports:
