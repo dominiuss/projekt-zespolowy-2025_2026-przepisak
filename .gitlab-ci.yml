@@ -68,6 +68,8 @@ build_backend:
   image: mcr.microsoft.com/dotnet/sdk:10.0
   script:
     - cd containers/backend
+    - mkdir -p obj/Release/net10.0
+    - mkdir -p bin/Release/net10.0
     - dotnet restore PrzepisakApi.csproj
     - dotnet build PrzepisakApi.csproj --configuration Release
   artifacts:
@@ -112,3 +114,9 @@ test-backend:
       junit: containers/backend/TestResults/*.trx
     paths:
       - containers/backend/TestResults/
+
+code_quality:
+  needs:
+    - lint_backend
+    - lint_frontend
+
