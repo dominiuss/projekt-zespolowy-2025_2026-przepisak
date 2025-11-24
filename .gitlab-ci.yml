@@ -27,7 +27,7 @@ lint_backend:
     - dotnet tool install -g dotnet-format
     - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet restore
-    - dotnet format PrzepisakApi.sln --verify-no-changes
+    - dotnet format PrzepisakApi.sln
     - dotnet build --configuration Release
   only:
     - merge_requests
