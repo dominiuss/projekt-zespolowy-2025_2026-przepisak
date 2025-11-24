@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 
+
 export default function RecipeDetails() {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // --- Oceny ---
+  const [ratings, setRatings] = useState([]);
+  const [score, setScore] = useState(0);
+  const [comment, setComment] = useState("");
+  const [ratingMessage, setRatingMessage] = useState(null);
+  const [ratingError, setRatingError] = useState(null);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -27,6 +35,62 @@ export default function RecipeDetails() {
 
     fetchRecipe();
   }, [id]);
+  // Pobieranie ocen przepisu
+  const fetchRatings = async () => {
+    try {
+      const res = await fetch(`http://10.6.57.161:5035/api/ratings/${id}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setRatings(data);
+    } catch (err) {
+      console.error("Błąd pobierania ocen:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRatings();
+  }, [id]);
+
+  const submitRating = async (e) => {
+    e.preventDefault();
+    setRatingMessage(null);
+    setRatingError(null);
+
+    if (!token) {
+      setRatingError("Musisz być zalogowany, aby ocenić przepis.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://10.6.57.161:5035/api/ratings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          recipeId: id,
+          score: Number(score),
+          comment,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setRatingMessage("Ocena została dodana!");
+        setScore(0);
+        setComment("");
+
+        // odświeżamy listę ocen
+        fetchRatings();
+      } else {
+        setRatingError(data.message || "Wystąpił błąd podczas dodawania oceny.");
+      }
+    } catch (err) {
+      setRatingError("Błąd klienta podczas dodawania oceny.");
+    }
+  };
 
   if (loading)
     return (
@@ -116,6 +180,84 @@ export default function RecipeDetails() {
           Instrukcje
         </h2>
         <p className="text-gray-700 whitespace-pre-line">{recipe.instructions}</p>
+        
+        {/* Dodawanie oceny */}
+        <div className="mt-12 p-6 bg-gray-100 rounded-lg shadow-md">
+          <h2 className="text-2xl font-semibold mb-4">Dodaj swoją ocenę</h2>
+
+          {ratingMessage && (
+            <p className="text-green-600 font-semibold mb-3">{ratingMessage}</p>
+          )}
+
+          {ratingError && (
+            <p className="text-red-600 font-semibold mb-3">{ratingError}</p>
+          )}
+
+          <form onSubmit={submitRating} className="flex flex-col gap-4">
+            <div>
+              <label className="font-semibold">Ocena (1–5):</label>
+              <input
+                type="number"
+                min="1"
+                max="5"
+                value={score}
+                onChange={(e) => setScore(e.target.value)}
+                className="border rounded p-2 w-20 ml-2"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="font-semibold">Komentarz (opcjonalnie):</label>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="border rounded p-2 w-full min-h-[80px]"
+                placeholder="Podziel się swoją opinią..."
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 w-fit"
+            >
+              Dodaj ocenę
+            </button>
+          </form>
+        </div>
+        {/* Lista ocen */}
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold mb-4">Opinie użytkowników</h2>
+
+          {ratings.length === 0 && (
+            <p className="text-gray-600 italic">
+              Brak ocen — bądź pierwszą osobą, która oceni ten przepis!
+            </p>
+          )}
+
+          <div className="flex flex-col gap-4">
+            {ratings.map((r) => (
+              <div key={r.id} className="bg-white p-4 rounded-lg shadow border">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">Ocena:</span>
+                  <span className="text-yellow-500 text-lg">
+                    {"★".repeat(r.score)}{"☆".repeat(5 - r.score)}
+                  </span>
+                </div>
+
+                {r.comment && (
+                  <p className="mt-2 text-gray-700">{r.comment}</p>
+                )}
+
+                <p className="text-sm text-gray-500 mt-2">
+                  Wystawiono: {new Date(r.createdAt).toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+
       </div>
     </div>
   );
