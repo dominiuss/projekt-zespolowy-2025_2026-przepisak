@@ -111,7 +111,7 @@ migrate-backend:
     - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet restore containers/backend/PrzepisakApi.csproj
     - dotnet build containers/backend/PrzepisakApi.csproj --no-restore
-    - dotnet ef migrations add SyncModel --project containers/backend/PrzepisakApi.csproj
+#    - dotnet ef migrations add SyncModel --project containers/backend/PrzepisakApi.csproj
     - dotnet ef database update --project containers/backend/PrzepisakApi.csproj
 #  only:
 #    - main
