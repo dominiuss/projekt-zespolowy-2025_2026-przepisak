@@ -127,10 +127,10 @@ test-backend:
     when: always
     reports:
       junit: containers/backend/test-results.trx
-      codequality: containers/backend/codequality/format.sarif
+      codequality: containers/backend/codequality/format-report.json
     paths:
       - containers/backend/test-result.trx
-      - containers/backend/codequality/format.sarif
+      - containers/backend/codequality/format-report.json
 
 #code_quality:
 #  stage: test
