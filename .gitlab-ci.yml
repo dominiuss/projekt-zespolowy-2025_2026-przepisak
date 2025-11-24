@@ -21,7 +21,7 @@ include:
 
 lint_backend:
   stage: lint
-  image: mcr.microsoft.com/dotnet/sdk:10.0-rc.2
+  image: mcr.microsoft.com/dotnet/sdk:10.0
   script:
     - cd containers/backend
     - dotnet tool install -g dotnet-format
