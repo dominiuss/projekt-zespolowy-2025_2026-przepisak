@@ -33,6 +33,10 @@ lint_backend:
     - dotnet clean
     - dotnet nuget locals all --clear
     - dotnet build PrzepisakApi.csproj --configuration Release
+  allow_failure: false
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
   only:
     - merge_requests
     - branches
@@ -51,6 +55,7 @@ lint_frontend:
     - cd containers/frontend/my-app
     - npm ci
     - npm run lint
+  allow_failure: false
   only:
     - merge_requests
     - branches
@@ -64,8 +69,8 @@ build_backend:
   image: mcr.microsoft.com/dotnet/sdk:10.0
   script:
     - cd containers/backend
-    - dotnet restore
-    - dotnet build --configuration Release
+    - dotnet restore PrzepisakApi.csproj
+    - dotnet build PrzepisakApi.csproj --configuration Release
   artifacts:
     paths:
       - containers/backend/bin/
@@ -93,3 +98,17 @@ build_frontend:
   only:
     - merge_requests
     - branches
+
+test-backend:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  script:
+    - cd containers/backend
+    - dotnet restore PrzepisakApi.csproj
+    - dotnet test PrzepisakApi.csproj --no-build --logger "trx;LogFileName=test-results.trx"
+  artifacts:
+    when: always
+    reports:
+      junit: containers/backend/TestResults/*.trx
+    paths:
+      - containers/backend/TestResults/
