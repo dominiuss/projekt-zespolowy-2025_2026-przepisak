@@ -1,6 +1,7 @@
 stages:
  # - lint
   - test
+  - migrate
   - build
   - deploy
 
