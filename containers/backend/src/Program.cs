@@ -125,6 +125,7 @@ app.UseHttpsRedirection();
 
 // Zezwolenie na przyjmowanie zapytań
 app.UseCors("FrontendCorsPolicy");
+app.Urls.Add("http://0.0.0.0:5035");
 
 app.UseAuthorization();
 
