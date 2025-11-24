@@ -31,7 +31,7 @@ lint_backend:
     - dotnet clean PrzepisakApi.csproj
     - dotnet nuget locals all --clear
     - dotnet restore PrzepisakApi.csproj
-    - dotnet format PrzepisakApi.csproj
+    - dotnet format PrzepisakApi.csproj --report ./gl-code-quality-report.json
   allow_failure: false
   artifacts:
     reports:
@@ -111,9 +111,9 @@ test-backend:
   artifacts:
     when: always
     reports:
-      junit: containers/backend/TestResults/*.trx
+      junit: containers/backend/TestResults/test-results.trx.trx
     paths:
-      - containers/backend/TestResults/
+      - containers/backend/TestResults/test-results.trx
 
 code_quality:
   needs:
