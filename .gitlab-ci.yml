@@ -1,13 +1,16 @@
 stages:
  # - lint
-  - build
   - test
+  - build
+  - deploy
 
 # ---- GLOBAL CONFIG ----
 variables:
   DOTNET_CLI_TELEMETRY_OPTOUT: "1"
   NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
   DOCKER_HOST: unix:///var/run/docker.sock
+  REGISTRY_URL: 10.6.57.161:5040
+  PROJECT_NAME: przepisak
 #  CL_USE_LOCAL_SCANNERS: "true"
 
 cache:
@@ -64,48 +67,6 @@ cache:
 #    - merge_requests
 #    - branches
 
-# ===============================
-#       BUILD BACKEND
-# ===============================
-
-build_backend:
-  stage: build
-  image: mcr.microsoft.com/dotnet/sdk:10.0
-  script:
-    - cd containers/backend
-    - mkdir -p obj/Release/net10.0 bin/Release/net10.0
-    - dotnet clean PrzepisakApi.csproj
-    - dotnet nuget locals all --clear
-    - dotnet restore PrzepisakApi.csproj
-    - dotnet build PrzepisakApi.csproj --configuration Release
-  artifacts:
-    paths:
-      - containers/backend/bin/
-  only:
-    - merge_requests
-    - branches
-
-# ===============================
-#       BUILD FRONTEND
-# ===============================
-
-build_frontend:
-  stage: build
-  image: node:20
-  cache:
-    paths:
-      - containers/frontend/my-app/node_modules/
-  script:
-    - cd containers/frontend/my-app
-    - npm ci
-    - npm run build
-  artifacts:
-    paths:
-      - containers/frontend/my-app/dist/
-  only:
-    - merge_requests
-    - branches
-
 test-backend:
   stage: test
   image: mcr.microsoft.com/dotnet/sdk:10.0
@@ -131,6 +92,69 @@ test-backend:
     paths:
       - containers/backend/test-result.trx
       - containers/backend/codequality/format-report.json
+
+
+
+# ===============================
+#       BUILD BACKEND
+# ===============================
+
+build-containers:
+  stage: build
+  image: docker:20.10 #mcr.microsoft.com/dotnet/sdk:10.0
+  script:
+#    - cd containers/backend
+#    - mkdir -p obj/Release/net10.0 bin/Release/net10.0
+#    - dotnet clean PrzepisakApi.csproj
+#    - dotnet nuget locals all --clear
+#    - dotnet restore PrzepisakApi.csproj
+#    - dotnet build PrzepisakApi.csproj --configuration Release
+    - echo "Building backend image..."
+    - docker build -t $REGISTRY_URL/$PROJECT_NAME/backend:latest ./containers/backend
+    - echo "Building frontend image..."
+    - docker build -t $REGISTRY_URL/$PROJECT_NAME/frontend:latest ./containers/frontend
+    - echo "Pushing backend image..."
+    - docker push $REGISTRY_URL/$PROJECT_NAME/backend:latest
+    - echo "Pushing frontend image..."
+    - docker push $REGISTRY_URL/$PROJECT_NAME/frontend:latest
+#  artifacts:
+#    paths:
+#      - containers/backend/bin/
+  only:
+    - merge_requests
+    - branches
+
+# ===============================
+#       BUILD FRONTEND
+# ===============================
+
+deploy-containers:
+  stage: deploy
+  image: docker:20.10 #node:20
+  cache:
+    paths:
+      - containers/frontend/my-app/node_modules/
+  script:
+#    - cd containers/frontend/my-app
+#    - npm ci
+#    - npm run build
+    - echo "Stopping existing containers..."
+    - docker rm -f frontend-przepisak || true
+    - docker rm -f backend-przepisak || true
+    - echo "Starting backend container..."
+    - docker run -d --name backend-przepisak -p 5035:5035 --restart always $REGISTRY_URL/$PROJECT_NAME/backend:latest
+    - echo "Starting frontend container..."
+    - docker run -d --name frontend-przepisak -p 5000:5000 --restart always $REGISTRY_URL/$PROJECT_NAME/frontend:latest
+#  artifacts:
+#    paths:
+#      - containers/frontend/my-app/dist/
+  only:
+    - merge_requests
+    - branches
+
+
+
+
 
 #code_quality:
 #  stage: test
