@@ -22,12 +22,15 @@ include:
 lint_backend:
   stage: lint
   image: mcr.microsoft.com/dotnet/sdk:10.0
+  before_script:
+  - mkdir -p containers/backend/obj/Release/net10.0
   script:
     - cd containers/backend
     - dotnet tool install -g dotnet-format
     - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet restore
     - dotnet format PrzepisakApi.sln
+    - dotnet clean
     - dotnet build --configuration Release
   only:
     - merge_requests
