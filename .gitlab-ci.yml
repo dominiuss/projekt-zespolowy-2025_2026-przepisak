@@ -1,57 +1,94 @@
-#stages:
-#  - docker-test
-#
-#docker-test:
-#  stage: docker-test
-#  image: docker:cli
-#  variables:
-#    DOCKER_HOST: unix:///var/run/docker.sock
-#  script:
-#    - docker info
-#    - docker run hello-world
 stages:
+  - lint
+  - build
   - test
 
-test-containers:
-  stage: test
-  image: docker:cli
-  variables:
-    DOCKER_HOST: unix:///var/run/docker.sock
+# ---- GLOBAL CONFIG ----
+variables:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
+
+cache:
+  paths:
+    - .nuget/packages/
+
+include:
+  - template: Code-Quality.gitlab-ci.yml   # automatyczny raport Code Climate
+
+# ===============================
+#   BACKEND LINT (.NET 10 RC2)
+# ===============================
+
+lint_backend:
+  stage: lint
+  image: mcr.microsoft.com/dotnet/sdk:10.0
   before_script:
-    # docker:cli jest alpine, więc instalujemy compose
-    - apk add --no-cache curl docker-cli-compose
-
+  - mkdir -p containers/backend/obj/Release/net10.0
   script:
-    - echo "Sprawdzanie dostępności Dockera..."
-    - docker info
+    - cd containers/backend
+    - dotnet tool install -g dotnet-format
+    - export PATH="$PATH:/root/.dotnet/tools"
+    - dotnet restore
+    - dotnet format PrzepisakApi.csproj
+    - dotnet clean
+    - dotnet build --configuration Release
+  only:
+    - merge_requests
+    - branches
 
-    - echo "Uruchamiam kontenery z docker-compose..."
-    - docker compose -f /git/containers/docker-compose.yml up -d --build
+# ===============================
+#   FRONTEND LINT (Vite + ESLint)
+# ===============================
 
-    # Funkcja czekająca na kontener
-    - |
-      wait_for_container() {
-        local name=$1
-        echo "Czekam na kontener $name..."
-        until [ "$(docker inspect -f '{{.State.Running}}' $name 2>/dev/null)" == "true" ]; do
-          sleep 2
-        done
-        echo "Kontener $name uruchomiony."
-      }
+lint_frontend:
+  stage: lint
+  image: node:20
+  cache:
+    paths:
+      - containers/frontend/my-app/node_modules/
+  script:
+    - cd containers/frontend/my-app
+    - npm ci
+    - npm run lint
+  only:
+    - merge_requests
+    - branches
 
-    # Lista kontenerów z compose
-    - containers=$(docker compose -f /git/containers/docker-compose.yml ps -q)
+# ===============================
+#       BUILD BACKEND
+# ===============================
 
-    # Czekanie na wszystkie kontenery
-    - for c in $containers; do wait_for_container $c; done
+build_backend:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  script:
+    - cd containers/backend
+    - dotnet restore
+    - dotnet build --configuration Release
+  artifacts:
+    paths:
+      - containers/backend/bin/
+  only:
+    - merge_requests
+    - branches
 
-    # Test frontend → nazwa usługi z compose: web
-    - echo "Test frontendu (web)..."
-    - docker exec frontend-przepisak curl -sSf http://localhost:5000 || echo "Frontend nie działa"
+# ===============================
+#       BUILD FRONTEND
+# ===============================
 
-    # Test backend → nazwa usługi: api
-    - echo "Test backendu (api)..."
-    - docker exec backend-przepisak curl -sSf http://localhost:5035 || echo "Backend nie działa"
-
-    - echo "Lista kontenerów:"
-    - docker ps
+build_frontend:
+  stage: build
+  image: node:20
+  cache:
+    paths:
+      - containers/frontend/my-app/node_modules/
+  script:
+    - cd containers/frontend/my-app
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - containers/frontend/my-app/dist/
+  only:
+    - merge_requests
+    - branches
