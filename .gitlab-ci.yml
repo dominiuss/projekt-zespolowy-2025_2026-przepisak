@@ -31,6 +31,7 @@ lint_backend:
     - dotnet restore
     - dotnet format PrzepisakApi.csproj
     - dotnet clean
+    - dotnet nuget locals all --clear
     - dotnet build --configuration Release
   only:
     - merge_requests
