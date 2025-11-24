@@ -121,6 +121,7 @@ test-backend:
     - dotnet format PrzepisakApi.csproj --verify-no-changes --report codequality || true
     - dotnet test PrzepisakApi.csproj --logger "trx;LogFileName=test-results.trx"
     - ls -al
+    - ls -al codequality
     - pwd
   artifacts:
     when: always
