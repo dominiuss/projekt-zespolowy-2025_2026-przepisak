@@ -1,57 +1,165 @@
-#stages:
-#  - docker-test
-#
-#docker-test:
-#  stage: docker-test
+stages:
+ # - lint
+  - test
+  - build
+  - deploy
+
+# ---- GLOBAL CONFIG ----
+variables:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
+  DOCKER_HOST: unix:///var/run/docker.sock
+  REGISTRY_URL: 10.6.57.161:5040
+  PROJECT_NAME: przepisak
+#  CL_USE_LOCAL_SCANNERS: "true"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - containers/backend/.nuget/packages/
+
+#include:
+#  - template: Code-Quality.gitlab-ci.yml   # automatyczny raport Code Climate
+
+# ===============================
+#   BACKEND LINT (.NET 10 RC2)
+# ===============================
+
+#lint_backend:
+#  stage: lint
+#  image: mcr.microsoft.com/dotnet/sdk:10.0
+#  script:
+#    - cd containers/backend
+#    - rm -f gl-code-quality-report.json
+#    - mkdir -p obj/Release/net10.0 bin/Release/net10.0
+#    - dotnet tool install -g dotnet-format
+#    - export PATH="$PATH:/root/.dotnet/tools"
+#    - dotnet clean PrzepisakApi.csproj
+#    - dotnet nuget locals all --clear
+#    - dotnet restore PrzepisakApi.csproj
+  #  - dotnet format PrzepisakApi.csproj --verify-no-changes --report $(pwd)/gl-code-quality-report.json || true
+
+    #- dotnet format PrzepisakApi.csproj --report ./gl-code-quality-report.json
+#  allow_failure: false
+#  #artifacts:
+#  #  reports:
+#  #    codequality: $(pwd)/gl-code-quality-report.json
+#  only:
+#    - merge_requests
+#    - branches
+
+# ===============================
+#   FRONTEND LINT (Vite + ESLint)
+# ===============================
+
+#lint_frontend:
+#  stage: lint
+#  image: node:20
+#  cache:
+#    paths:
+#      - containers/frontend/my-app/node_modules/
+#  script:
+#    - cd containers/frontend/my-app
+#    - npm ci
+#    - npm run lint
+#  allow_failure: false
+#  only:
+#    - merge_requests
+#    - branches
+
+test-backend:
+  stage: test
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  script:
+    - mkdir -p containers/backend/TestResults
+    - rm -f containers/backend/codequality
+    - mkdir -p containers/backend/codequality
+    - cd containers/backend
+    - dotnet tool install -g dotnet-format
+    - export PATH="$PATH:/root/.dotnet/tools"
+    - dotnet restore PrzepisakApi.csproj
+    - dotnet build PrzepisakApi.csproj --configuration Release
+    - dotnet format PrzepisakApi.csproj --verify-no-changes --report codequality || true
+    - dotnet test PrzepisakApi.csproj --logger "trx;LogFileName=test-results.trx"
+    - ls -al
+    - ls -al codequality
+    - pwd
+  artifacts:
+    when: always
+    reports:
+      junit: containers/backend/test-results.trx
+      codequality: containers/backend/codequality/format-report.json
+    paths:
+      - containers/backend/test-result.trx
+      - containers/backend/codequality/format-report.json
+
+
+
+# ===============================
+#       BUILD BACKEND
+# ===============================
+
+build-containers:
+  stage: build
+  image: docker:cli #mcr.microsoft.com/dotnet/sdk:10.0
+  script:
+#    - cd containers/backend
+#    - mkdir -p obj/Release/net10.0 bin/Release/net10.0
+#    - dotnet clean PrzepisakApi.csproj
+#    - dotnet nuget locals all --clear
+#    - dotnet restore PrzepisakApi.csproj
+#    - dotnet build PrzepisakApi.csproj --configuration Release
+    - echo "Building backend image..."
+    - docker build -t $REGISTRY_URL/$PROJECT_NAME/backend:latest ./containers/backend
+    - echo "Building frontend image..."
+    - docker build -t $REGISTRY_URL/$PROJECT_NAME/frontend:latest ./containers/frontend
+    - echo "Pushing backend image..."
+    - docker push $REGISTRY_URL/$PROJECT_NAME/backend:latest
+    - echo "Pushing frontend image..."
+    - docker push $REGISTRY_URL/$PROJECT_NAME/frontend:latest
+#  artifacts:
+#    paths:
+#      - containers/backend/bin/
+  only:
+    - merge_requests
+    - branches
+
+# ===============================
+#       BUILD FRONTEND
+# ===============================
+
+deploy-containers:
+  stage: deploy
+  image: docker:cli #node:20
+  cache:
+    paths:
+      - containers/frontend/my-app/node_modules/
+  script:
+#    - cd containers/frontend/my-app
+#    - npm ci
+#    - npm run build
+    - echo "Stopping existing containers..."
+    - docker rm -f frontend-przepisak || true
+    - docker rm -f backend-przepisak || true
+    - echo "Starting backend container..."
+    - docker run -d --name backend-przepisak -p 5035:5035 --restart always $REGISTRY_URL/$PROJECT_NAME/backend:latest
+    - echo "Starting frontend container..."
+    - docker run -d --name frontend-przepisak -p 5000:5000 --restart always $REGISTRY_URL/$PROJECT_NAME/frontend:latest
+#  artifacts:
+#    paths:
+#      - containers/frontend/my-app/dist/
+  only:
+    - merge_requests
+    - branches
+
+
+
+
+
+#code_quality:
+#  stage: test
 #  image: docker:cli
 #  variables:
-#    DOCKER_HOST: unix:///var/run/docker.sock
-#  script:
-#    - docker info
-#    - docker run hello-world
-stages:
-  - test
-
-test-containers:
-  stage: test
-  image: docker:cli
-  variables:
-    DOCKER_HOST: unix:///var/run/docker.sock
-  before_script:
-    # docker:cli jest alpine, więc instalujemy compose
-    - apk add --no-cache curl docker-cli-compose
-
-  script:
-    - echo "Sprawdzanie dostępności Dockera..."
-    - docker info
-
-    - echo "Uruchamiam kontenery z docker-compose..."
-    - docker compose -f /git/containers/docker-compose.yml up -d --build
-
-    # Funkcja czekająca na kontener
-    - |
-      wait_for_container() {
-        local name=$1
-        echo "Czekam na kontener $name..."
-        until [ "$(docker inspect -f '{{.State.Running}}' $name 2>/dev/null)" == "true" ]; do
-          sleep 2
-        done
-        echo "Kontener $name uruchomiony."
-      }
-
-    # Lista kontenerów z compose
-    - containers=$(docker compose -f /git/containers/docker-compose.yml ps -q)
-
-    # Czekanie na wszystkie kontenery
-    - for c in $containers; do wait_for_container $c; done
-
-    # Test frontend → nazwa usługi z compose: web
-    - echo "Test frontendu (web)..."
-    - docker exec frontend-przepisak curl -sSf http://localhost:5000 || echo "Frontend nie działa"
-
-    # Test backend → nazwa usługi: api
-    - echo "Test backendu (api)..."
-    - docker exec backend-przepisak curl -sSf http://localhost:5035 || echo "Backend nie działa"
-
-    - echo "Lista kontenerów:"
-    - docker ps
+#    DOCKER_API_VERSION: "1.44"
+#  artifacts:
+#    paths: [gl-code-quality-report.json]

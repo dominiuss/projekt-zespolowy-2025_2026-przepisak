@@ -38,10 +38,35 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
                 JOIN ""AspNetUsers"" iu ON iu.""Id"" = u.identity_user_id
                 WHERE 1=1 
             ";
-
+            var parameters = new DynamicParameters();
             if (categoryIds != null && categoryIds.Any())
             {
                 sql += " AND r.category_id = ANY(@CategoryIds)";
+                parameters.Add("CategoryIds", categoryIds.ToArray());
+            }
+
+            if (includedIngredientIds != null && includedIngredientIds.Any())
+            {
+                sql += @"
+                    AND r.id IN (
+                        SELECT ri.recipe_id
+                        FROM recipe_ingredients ri
+                        WHERE ri.ingredient_id = ANY(@IncludedIds)
+                        GROUP BY ri.recipe_id
+                        HAVING COUNT(DISTINCT ri.ingredient_id) = @IncludedCount)";
+                parameters.Add("IncludedIds", includedIngredientIds.ToArray());
+                parameters.Add("IncludedCount", includedIngredientIds.Count());
+            }
+            if (excludedIngredientIds != null && excludedIngredientIds.Any())
+            {
+                sql += @"
+                        AND r.id NOT IN (
+                            SELECT ri.recipe_id 
+                            FROM recipe_ingredients ri
+                            WHERE ri.ingredient_id = ANY(@ExcludedIds)
+                        )";
+
+                parameters.Add("ExcludedIds", excludedIngredientIds.ToArray());
             }
 
             if (includedIngredientIds != null && includedIngredientIds.Any())
@@ -195,7 +220,7 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 
         public Recipe Update(Recipe recipe)
         {
-            var existingRecipe = _efContext.Recipes.FirstOrDefault(r => r.Id == recipe.Id);
+            var existingRecipe = _efContext.Recipes.Include(recipe => recipe.RecipeIngredients).FirstOrDefault(r => r.Id == recipe.Id);
             if (existingRecipe == null) return null;
 
             existingRecipe.Title = recipe.Title;
@@ -209,6 +234,17 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
             existingRecipe.AuthorId = recipe.AuthorId;
             existingRecipe.CategoryId = recipe.CategoryId;
             existingRecipe.UpdatedAt = DateTime.UtcNow;
+
+            existingRecipe.RecipeIngredients.Clear();
+
+            if (recipe.RecipeIngredients != null)
+            {
+                foreach (var ingredient in recipe.RecipeIngredients)
+                {
+                    existingRecipe.RecipeIngredients.Add(ingredient);
+                }
+            }
+
             return existingRecipe;
         }
 
@@ -216,6 +252,15 @@ namespace PrzepisakApi.src.Features.Recipes.Infrastructure
         {
             var recipe = _efContext.Recipes.FirstOrDefault(x => x.Id == id);
             if (recipe != null) _efContext.Recipes.Remove(recipe);
+        }
+
+        public async Task<List<RecipeIngredientDTO>> GetAllIngredientsAsync()
+        {
+            using var connection = _dapperContext.CreateConnection();
+            var sql = "SELECT id AS Id, name AS Name FROM ingredients ORDER BY name ASC";
+
+            var result = await connection.QueryAsync<RecipeIngredientDTO>(sql);
+            return result.ToList();
         }
     }
 }
