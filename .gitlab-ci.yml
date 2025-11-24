@@ -32,7 +32,7 @@ lint_backend:
     - dotnet clean PrzepisakApi.csproj
     - dotnet nuget locals all --clear
     - dotnet restore PrzepisakApi.csproj
-    - dotnet format PrzepisakApi.csproj --verify-no-changes --report gl-code-quality-report.sarif || true
+    - dotnet format PrzepisakApi.csproj --verify-no-changes --report containers/backend/gl-code-quality-report.sarif || true
 
     #- dotnet format PrzepisakApi.csproj --report ./gl-code-quality-report.json
   allow_failure: false
