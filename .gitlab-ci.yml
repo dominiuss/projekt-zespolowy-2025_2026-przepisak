@@ -27,16 +27,18 @@ lint_backend:
   script:
     - cd containers/backend
     - mkdir -p obj/Release/net10.0 bin/Release/net10.0
-    - dotnet tool install -g dotnet-format
+    #- dotnet tool install -g dotnet-format
+    - dotnet tool install -g dotnet-code-quality
     - export PATH="$PATH:/root/.dotnet/tools"
     - dotnet clean PrzepisakApi.csproj
     - dotnet nuget locals all --clear
     - dotnet restore PrzepisakApi.csproj
-    - dotnet format PrzepisakApi.csproj --report ./gl-code-quality-report.json
+    - dotnet code-quality --output gl-code-quality-report.json
+    #- dotnet format PrzepisakApi.csproj --report ./gl-code-quality-report.json
   allow_failure: false
   artifacts:
     reports:
-      codequality: gl-code-quality-report.json
+      codequality: containers/backend/gl-code-quality-report.json
   only:
     - merge_requests
     - branches
@@ -112,9 +114,9 @@ test-backend:
   artifacts:
     when: always
     reports:
-      junit: containers/backend/TestResults/test-results.trx
+      junit: TestResults/test-results.trx
     paths:
-      - containers/backend/TestResults/test-results.trx
+      - TestResults/test-results.trx
 
 code_quality:
   needs:
