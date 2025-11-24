@@ -33,12 +33,13 @@ lint_backend:
     - dotnet clean PrzepisakApi.csproj
     - dotnet nuget locals all --clear
     - dotnet restore PrzepisakApi.csproj
-    - dotnet code-quality --output gl-code-quality-report.json
+    - dotnet format PrzepisakApi.csproj --verify-no-changes --report gl-code-quality-report.sarif
+
     #- dotnet format PrzepisakApi.csproj --report ./gl-code-quality-report.json
   allow_failure: false
   artifacts:
     reports:
-      codequality: containers/backend/gl-code-quality-report.json
+      codequality: containers/backend/gl-code-quality-report.sarif
   only:
     - merge_requests
     - branches
