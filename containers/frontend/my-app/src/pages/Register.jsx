@@ -156,15 +156,26 @@ export default function Register() {
           >
             Zarejestruj się
           </button>
+          </form>
 
-          {error && (
-            <p className="text-red-600 text-center font-medium">{error}</p>
-          )}
-          {success && (
-            <p className="text-green-600 text-center font-medium">{success}</p>
-          )}
-        </form>
-      </div>
+      {error && (
+        <p className="text-red-600 text-center font-medium">{error}</p>
+      )}
+      {success && (
+        <p className="text-green-600 text-center font-medium">{success}</p>
+      )}
+
+      <p className="text-center text-gray-600 mt-6">
+        Masz już konto?{" "}
+        <a
+          href="/login"
+          className="text-purple-600 hover:underline font-medium"
+        >
+          Zaloguj się
+        </a>
+      </p>
+
     </div>
-  );
+  </div>
+);
 }

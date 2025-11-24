@@ -37,8 +37,8 @@ export default function Home() {
     setLoading(true);
     try {
       const [byNameRes, byTitleRes] = await Promise.all([
-        fetch(`http://10.6.57.161:5035/api/recipes/search/name?query=${search}`),
-        fetch(`http://10.6.57.161:5035/api/recipes/search/title?query=${search}`)
+        fetch(`http://10.6.57.161:5035/api/recipes/search/name?name=${search}`),
+        fetch(`http://10.6.57.161:5035/api/recipes/search/title?title=${search}`)
       ]);
 
       if (!byNameRes.ok || !byTitleRes.ok) throw new Error("Błąd wyszukiwania");
@@ -102,6 +102,20 @@ export default function Home() {
                 <h2 className="text-xl font-semibold mb-1">{recipe.title}</h2>
                 <p className="text-sm text-gray-500 mb-2">Autor: {recipe.authorName}</p>
                 <p className="text-gray-600">{recipe.description}</p>
+
+                {/* Ocena przepisu */}
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-yellow-500 text-lg">⭐</span>
+                  <span className="font-semibold">
+                    {recipe.averageRating ? recipe.averageRating.toFixed(1) : "Brak ocen"}
+                  </span>
+
+                  {recipe.ratingsCount > 0 && (
+                    <span className="text-gray-500 text-sm">
+                      ({recipe.ratingsCount} ocen)
+                    </span>
+                  )}
+                </div>
               </div>
             </Link>
 
@@ -110,5 +124,5 @@ export default function Home() {
       )}
     </div>
   );
-  
+
 }
