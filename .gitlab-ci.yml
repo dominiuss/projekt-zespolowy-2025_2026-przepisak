@@ -113,19 +113,21 @@ test-backend:
     - cd containers/backend
     - dotnet restore PrzepisakApi.csproj
     - dotnet build PrzepisakApi.csproj --configuration Release
-    - dotnet test PrzepisakApi.csproj --logger "trx;LogFileName=TestResults/test-results.trx"
+    - dotnet test PrzepisakApi.csproj --logger "trx;LogFileName=test-results.trx"
     - ls -al
     - pwd
   artifacts:
     when: always
     reports:
-      junit: containers/backend/TestResults/test-results.trx
+      junit: containers/backend/test-results.trx
     paths:
-      - containers/backend/TestResults/
+      - containers/backend/
 
 code_quality:
   stage: test
-  image: docker:29.0.2
+  image: docker:28.0.5
+  variables:
+    DOCKER_API_VERSION: "1.44"
   needs:
     - lint_backend
     - lint_frontend
