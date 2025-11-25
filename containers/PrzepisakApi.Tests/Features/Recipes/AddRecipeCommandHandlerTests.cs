@@ -92,7 +92,7 @@ namespace PrzepisakApi.Tests.Features.Recipes
                     CookTime = r.CookTime,
                     Servings = r.Servings,
                     CategoryId = r.CategoryId,
-                    CategoryName = "Test Category",
+                    CategoryName = category.Nme,
                     Cuisine = r.Cuisine,
                     ImageUrl = r.ImageUrl,
                     AuthorName = "test@test.com",
