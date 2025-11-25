@@ -1,0 +1,6 @@
+@PrzepisakApi_HostAddress = http://localhost:5035
+
+GET {{PrzepisakApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

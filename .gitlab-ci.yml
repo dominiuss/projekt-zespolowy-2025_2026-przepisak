@@ -1,26 +1,188 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/user/application_security/secret_detection/pipeline/configure
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 stages:
-- build
-- test
-- deploy
-- review
-- dast
-- staging
-- canary
-- production
-- incremental rollout 10%
-- incremental rollout 25%
-- incremental rollout 50%
-- incremental rollout 100%
-- performance
-- cleanup
-sast:
+ # - lint
+  - test
+#  - migrate
+  - build
+  - deploy
+
+# ---- GLOBAL CONFIG ----
+variables:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
+  DOCKER_HOST: unix:///var/run/docker.sock
+  REGISTRY_URL: 10.6.57.161:5040
+  PROJECT_NAME: przepisak
+#  CL_USE_LOCAL_SCANNERS: "true"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - containers/backend/.nuget/packages/
+
+#include:
+#  - template: Code-Quality.gitlab-ci.yml   # automatyczny raport Code Climate
+
+# ===============================
+#   BACKEND LINT (.NET 10 RC2)
+# ===============================
+
+#lint_backend:
+#  stage: lint
+#  image: mcr.microsoft.com/dotnet/sdk:10.0
+#  script:
+#    - cd containers/backend
+#    - rm -f gl-code-quality-report.json
+#    - mkdir -p obj/Release/net10.0 bin/Release/net10.0
+#    - dotnet tool install -g dotnet-format
+#    - export PATH="$PATH:/root/.dotnet/tools"
+#    - dotnet clean PrzepisakApi.csproj
+#    - dotnet nuget locals all --clear
+#    - dotnet restore PrzepisakApi.csproj
+  #  - dotnet format PrzepisakApi.csproj --verify-no-changes --report $(pwd)/gl-code-quality-report.json || true
+
+    #- dotnet format PrzepisakApi.csproj --report ./gl-code-quality-report.json
+#  allow_failure: false
+#  #artifacts:
+#  #  reports:
+#  #    codequality: $(pwd)/gl-code-quality-report.json
+#  only:
+#    - merge_requests
+#    - branches
+
+# ===============================
+#   FRONTEND LINT (Vite + ESLint)
+# ===============================
+
+#lint_frontend:
+#  stage: lint
+#  image: node:20
+#  cache:
+#    paths:
+#      - containers/frontend/my-app/node_modules/
+#  script:
+#    - cd containers/frontend/my-app
+#    - npm ci
+#    - npm run lint
+#  allow_failure: false
+#  only:
+#    - merge_requests
+#    - branches
+
+test-backend:
   stage: test
-include:
-- template: Auto-DevOps.gitlab-ci.yml
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  script:
+    - rm -f containers/backend/codequality
+    - mkdir -p containers/backend/codequality
+    - cd containers/backend
+    - dotnet tool install -g dotnet-format
+    - export PATH="$PATH:/root/.dotnet/tools"
+    - dotnet restore PrzepisakApi.csproj
+    - dotnet build PrzepisakApi.csproj --configuration Release
+    - dotnet format PrzepisakApi.csproj --verify-no-changes --report codequality || true
+    - cd ../PrzepisakApi.Tests
+    - dotnet restore PrzepisakApi.Tests.csproj
+    - dotnet build PrzepisakApi.Tests.csproj --configuration Release
+    - dotnet test PrzepisakApi.Tests.csproj --logger "trx;LogFileName=test-results.trx"
+#    - ls -al
+#    - ls -al codequality
+#    - pwd
+  artifacts:
+    when: always
+    reports:
+      junit: containers/PrzepisakApi.Tests/TestResults/test-results.trx
+      codequality: containers/backend/codequality/format-report.json
+    paths:
+      - containers/PrzepisakApi.Tests/TestResults/test-results.trx
+      - containers/backend/codequality/format-report.json
+
+#migrate-backend:
+#  stage: migrate
+##  image: mcr.microsoft.com/dotnet/sdk:10.0
+#  services:
+#    - name: postgres:18
+#      alias: db
+#  variables:
+#    POSTGRES_USER: student
+#    POSTGRES_PASSWORD: wcy
+#    POSTGRES_DB: przepisak
+#  variables:
+#    ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=przepisak;Username=student;Password=wcy"
+#  script:
+#    - dotnet tool install --global dotnet-ef
+#    - export PATH="$PATH:/root/.dotnet/tools"
+#    - dotnet restore containers/backend/PrzepisakApi.csproj
+#    - dotnet build containers/backend/PrzepisakApi.csproj --no-restore
+#    - dotnet ef migrations add SyncModel --project containers/backend/PrzepisakApi.csproj
+#    - dotnet ef database update --project containers/backend/PrzepisakApi.csproj
+#  only:
+#    - main
+
+# ===============================
+#       BUILD BACKEND
+# ===============================
+
+build-containers:
+  stage: build
+  image: docker:cli #mcr.microsoft.com/dotnet/sdk:10.0
+  script:
+#    - cd containers/backend
+#    - mkdir -p obj/Release/net10.0 bin/Release/net10.0
+#    - dotnet clean PrzepisakApi.csproj
+#    - dotnet nuget locals all --clear
+#    - dotnet restore PrzepisakApi.csproj
+#    - dotnet build PrzepisakApi.csproj --configuration Release
+    - echo "Building backend image..."
+    - docker build -t $REGISTRY_URL/$PROJECT_NAME/backend:latest ./containers/backend
+    - echo "Building frontend image..."
+    - docker build -t $REGISTRY_URL/$PROJECT_NAME/frontend:latest ./containers/frontend
+    - echo "Pushing backend image..."
+    - docker push $REGISTRY_URL/$PROJECT_NAME/backend:latest
+    - echo "Pushing frontend image..."
+    - docker push $REGISTRY_URL/$PROJECT_NAME/frontend:latest
+#  artifacts:
+#    paths:
+#      - containers/backend/bin/
+  only:
+    - merge_requests
+    - branches
+
+# ===============================
+#       BUILD FRONTEND
+# ===============================
+
+deploy-containers:
+  stage: deploy
+  image: docker:cli #node:20
+  cache:
+    paths:
+      - containers/frontend/my-app/node_modules/
+  script:
+#    - cd containers/frontend/my-app
+#    - npm ci
+#    - npm run build
+    - echo "Stopping existing containers..."
+    - docker rm -f frontend-przepisak || true
+    - docker rm -f backend-przepisak || true
+    - echo "Starting backend container..."
+    - docker run -d --name backend-przepisak -p 5035:5035 --restart always $REGISTRY_URL/$PROJECT_NAME/backend:latest
+    - echo "Starting frontend container..."
+    - docker run -d --name frontend-przepisak -p 5000:5000 --restart always $REGISTRY_URL/$PROJECT_NAME/frontend:latest
+#  artifacts:
+#    paths:
+#      - containers/frontend/my-app/dist/
+  only:
+    - merge_requests
+    - branches
+
+
+
+
+
+#code_quality:
+#  stage: test
+#  image: docker:cli
+#  variables:
+#    DOCKER_API_VERSION: "1.44"
+#  artifacts:
+#    paths: [gl-code-quality-report.json]
