@@ -72,7 +72,6 @@ test-backend:
   stage: test
   image: mcr.microsoft.com/dotnet/sdk:10.0
   script:
-    - mkdir -p containers/backend/TestResults
     - rm -f containers/backend/codequality
     - mkdir -p containers/backend/codequality
     - cd containers/backend
@@ -91,10 +90,10 @@ test-backend:
   artifacts:
     when: always
     reports:
-      junit: containers/PrzepisakApi.Tests/test-results.trx
+      junit: containers/PrzepisakApi.Tests/TestResults/test-results.trx
       codequality: containers/backend/codequality/format-report.json
     paths:
-      - containers/PrzepisakApi.Tests/test-result.trx
+      - containers/PrzepisakApi.Tests/TestResults/test-results.trx
       - containers/backend/codequality/format-report.json
 
 #migrate-backend:
