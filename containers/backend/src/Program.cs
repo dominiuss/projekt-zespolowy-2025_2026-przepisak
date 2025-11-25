@@ -125,7 +125,7 @@ app.UseHttpsRedirection();
 
 // Zezwolenie na przyjmowanie zapytań
 app.UseCors("FrontendCorsPolicy");
-app.UseAuthentication();
+//app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
