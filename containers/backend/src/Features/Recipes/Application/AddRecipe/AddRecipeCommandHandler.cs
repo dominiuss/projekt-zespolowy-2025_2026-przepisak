@@ -37,6 +37,17 @@ namespace PrzepisakApi.src.Features.Recipes.Application.AddRecipe
             if (identityId == null)
                 throw new UnauthorizedAccessException();
 
+                // --- SPRAWDZENIE LUB UTWORZENIE KATEGORII ---
+            var category = await _efContext.Categories
+                .FirstOrDefaultAsync(c => c.Name == request.CategoryName, cancellationToken);
+
+            if (category == null)
+            {
+                category = new Category { Name = request.CategoryName };
+                _efContext.Categories.Add(category);
+                await _efContext.SaveChangesAsync(cancellationToken);
+            }
+            
             var currentUser = await _efContext.Users
                 .Include(u => u.IdentityUser)
                 .FirstOrDefaultAsync(u => u.IdentityUserId == identityId, cancellationToken);
@@ -46,6 +57,7 @@ namespace PrzepisakApi.src.Features.Recipes.Application.AddRecipe
 
             var recipe = _mapper.Map<Recipe>(request);
             recipe.AuthorId = currentUser.Id;
+            recipe.CategoryId = category.Id;   // przypisujemy ID kategorii
             recipe.CreatedAt = DateTime.UtcNow;
             recipe.UpdatedAt = DateTime.UtcNow;
 
