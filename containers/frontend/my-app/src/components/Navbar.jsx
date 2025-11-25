@@ -7,21 +7,31 @@ export default function Navbar() {
 
   const [username, setUsername] = useState(null);
 
+  // Aktualizacja przy zmianie strony
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("username");
 
-    if (token && storedUser) {
-      setUsername(storedUser);
-    } else {
-      setUsername(null);
-    }
-  }, [location.pathname]); 
-  // aktualizuje navbar po zmianie strony (np. po logowaniu)
+    setUsername(token && storedUser ? storedUser : null);
+  }, [location.pathname]);
+
+  // Aktualizacja globalna gdy localStorage zmieni się (np. po logowaniu)
+  useEffect(() => {
+    const syncAuth = () => {
+      const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("username");
+
+      setUsername(token && storedUser ? storedUser : null);
+    };
+
+    window.addEventListener("storage", syncAuth);
+    return () => window.removeEventListener("storage", syncAuth);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
+
     setUsername(null);
     navigate("/login");
   };
@@ -71,6 +81,7 @@ export default function Navbar() {
               </button>
             </>
           )}
+
         </div>
       </div>
     </nav>
