@@ -33,7 +33,7 @@ export default function AddRecipe() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({ addUpdateRecipeDTO: payload })
+      body: JSON.stringify(payload)
     });
 
     if (!res.ok) {
