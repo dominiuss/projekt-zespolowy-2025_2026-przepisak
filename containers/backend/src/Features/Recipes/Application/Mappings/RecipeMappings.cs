@@ -65,6 +65,21 @@ namespace PrzepisakApi.src.Features.Recipes.Application.Mappings
                 .Map(dest => dest.CategoryId, src => src.CategoryId)
                 .Map(dest => dest.Cuisine, src => src.Cuisine)
                 .Map(dest => dest.ImageUrl, src => src.ImageUrl);
+
+            // AddRecipeDTO → AddRecipeCommand (wejściowy)
+            TypeAdapterConfig<AddRecipeDTO, AddRecipeCommand>.NewConfig()
+                .Map(dest => dest.Title, src => src.Title)
+                .Map(dest => dest.Description, src => src.Description)
+                .Map(dest => dest.Instructions, src => src.Instructions)
+                .Map(dest => dest.PreparationTime, src => src.PreparationTime)
+                .Map(dest => dest.CookTime, src => src.CookTime)
+                .Map(dest => dest.Servings, src => src.Servings)
+                .Map(dest => dest.CategoryName, src => src.CategoryName)
+                .Map(dest => dest.Cuisine, src => src.Cuisine)
+                .Map(dest => dest.ImageUrl, src => src.ImageUrl)
+                .Map(dest => dest.RecipeIngredients, src => src.RecipeIngredients);
+
+            
         }
     }
 }
