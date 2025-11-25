@@ -60,9 +60,10 @@ namespace PrzepisakApi.Tests.Features.Recipes
             }));
             _httpContextMock.Setup(h => h.HttpContext.User).Returns(claimsPrincipal);
 
-            // Dodanie kategorii
+            // Dodanie kategorii do kontekstu tylko raz
             var category = new Category { Id = 1, Name = "Test Category" };
             _efContext.Categories.Add(category);
+            await _efContext.SaveChangesAsync();
 
             // 3. Mockujemy mapper - obiekt Recipe MUSI mieć wypełnione pola wymagane!
             var recipe = new Recipe
@@ -80,7 +81,7 @@ namespace PrzepisakApi.Tests.Features.Recipes
             };
 
             _mapperMock.Setup(m => m.Map<Recipe>(command)).Returns(recipe);
-            _mapperMock.Setup(m => m.Map<AddUpdateRecipeDTO>(It.IsAny<Recipe>())).Returns(new AddUpdateRecipeDTO());
+            _mapperMock.Setup(m => m.Map<AddUpdateRecipeDTO>(It.IsAny<Recipe>())).Returns(new AddUpdateRecipeDTO { CategoryName = category.Name, AuthorName = identityUser.Email });
 
             // Act
             await _handler.Handle(command, CancellationToken.None);

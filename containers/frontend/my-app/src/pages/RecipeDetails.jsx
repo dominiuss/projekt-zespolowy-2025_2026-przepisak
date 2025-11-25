@@ -183,7 +183,7 @@ export default function RecipeDetails() {
             <ul className="list-disc list-inside text-gray-800 mb-8">
               {recipe.recipeIngredients.map((ing, idx) => (
                 <li key={idx}>
-                  <span className="font-medium">{ing.ingredientName}</span>
+                  <span className="font-medium">{ing.name}</span>
                   {ing.quantity && ` – ${ing.quantity}`}
                 </li>
               ))}
