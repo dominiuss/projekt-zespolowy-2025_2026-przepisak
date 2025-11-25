@@ -31,6 +31,14 @@ namespace PrzepisakApi.Tests.Features.Recipes
             _efContext = new EfContext(options);
 
             _handler = new UpdateRecipeCommandHandler(_repoMock.Object, _mapperMock.Object, _efContext, _httpContextMock.Object);
+            
+            // Dodanie kategorii do kontekstu (trzeba wypełnić wymagane pole Name)
+            var category = new Category
+            {
+                Id = 1,
+                Name = "Test Category"
+            };
+            _efContext.Categories.Add(category);
         }
 
         [Fact]
@@ -41,15 +49,6 @@ namespace PrzepisakApi.Tests.Features.Recipes
             var identityUser = new IdentityUser { Id = identityId, UserName = "test" };
 
             var userProfile = new User { Id = 10, IdentityUserId = identityId, IdentityUser = identityUser };
-
-
-            // Dodanie kategorii do kontekstu (trzeba wypełnić wymagane pole Name)
-            var category = new Category
-            {
-                Id = 1,
-                Name = "Test Category"
-            };
-            _efContext.Categories.Add(category);
 
             // WYPEŁNIAMY WYMAGANE POLA:
             var recipe = new Recipe
