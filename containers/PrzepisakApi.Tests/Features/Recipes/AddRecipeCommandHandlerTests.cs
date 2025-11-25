@@ -81,7 +81,23 @@ namespace PrzepisakApi.Tests.Features.Recipes
             };
 
             _mapperMock.Setup(m => m.Map<Recipe>(command)).Returns(recipe);
-            _mapperMock.Setup(m => m.Map<AddUpdateRecipeDTO>(It.IsAny<Recipe>())).Returns(new AddUpdateRecipeDTO { CategoryName = category.Name, AuthorName = identityUser.Email });
+            _mapperMock.Setup(m => m.Map<AddUpdateRecipeDTO>(It.IsAny<Recipe>()))
+                .Returns<Recipe>(r => new AddUpdateRecipeDTO
+                {
+                    Id = r.Id,
+                    Title = r.Title,
+                    Description = r.Description,
+                    Instructions = r.Instructions,
+                    PreparationTime = r.PreparationTime,
+                    CookTime = r.CookTime,
+                    Servings = r.Servings,
+                    CategoryId = r.CategoryId,
+                    CategoryName = "Test Category",
+                    Cuisine = r.Cuisine,
+                    ImageUrl = r.ImageUrl,
+                    AuthorName = "test@test.com",
+                    RecipeIngredients = new List<AddUpdateRecipeIngredientDTO>()
+                });
 
             // Act
             await _handler.Handle(command, CancellationToken.None);
