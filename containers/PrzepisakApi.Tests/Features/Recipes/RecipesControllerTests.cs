@@ -59,7 +59,7 @@ namespace PrzepisakApi.Tests.Features.Recipes
         public async Task Add_ShouldReturnCreated()
         {
             // Arrange
-            var dto = new AddUpdateRecipeDTO { Title = "New" };
+            var dto = new AddRecipeDTO { Title = "New" };
             var command = new AddRecipeCommand();
             var resultDto = new AddUpdateRecipeDTO { Id = 10, Title = "New" };
 
