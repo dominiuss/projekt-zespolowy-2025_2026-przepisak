@@ -174,7 +174,25 @@ export default function RecipeDetails() {
           Opis
         </h2>
         <p className="text-gray-700 mb-6">{recipe.description}</p>
+          {/* Składniki */}
+          <h2 className="text-2xl font-semibold text-orange-700 mt-8 mb-3">
+            Składniki
+          </h2>
 
+          {recipe.recipeIngredients && recipe.recipeIngredients.length > 0 ? (
+            <ul className="list-disc list-inside text-gray-800 mb-8">
+              {recipe.recipeIngredients.map((ing, idx) => (
+                <li key={idx}>
+                  <span className="font-medium">{ing.ingredientName}</span>
+                  {ing.quantity && ` – ${ing.quantity}`}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-600 italic mb-8">
+              Brak danych o składnikach.
+            </p>
+          )}
         {/* Instrukcje */}
         <h2 className="text-2xl font-semibold text-orange-700 mb-2">
           Instrukcje
