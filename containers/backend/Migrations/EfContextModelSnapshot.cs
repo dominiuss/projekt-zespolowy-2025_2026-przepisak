@@ -5,12 +5,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PrzepisakApi.src.Database;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
 namespace PrzepisakApi.Migrations
 {
     [DbContext(typeof(EfContext))]
+    [ExcludeFromCodeCoverage]
     partial class EfContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

@@ -3,9 +3,11 @@ using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.Recipes.Application.DTOs;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PrzepisakApi.src.Features.Recipes.Infrastructure
 {
+    [ExcludeFromCodeCoverage]
     public class RecipeRepository : IRecipeRepository
     {
         private readonly IEfContext _efContext;

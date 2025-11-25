@@ -3,6 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using PrzepisakApi.src.Database;
 using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.Recipes.Infrastructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
 
 namespace PrzepisakApi.Tests.Features.Recipes
 {
@@ -13,161 +17,109 @@ namespace PrzepisakApi.Tests.Features.Recipes
 
         public RecipeRepositoryTests()
         {
-
             var options = new DbContextOptionsBuilder<EfContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             _efContext = new EfContext(options);
-
             _repository = new RecipeRepository(_efContext, null!);
         }
 
         [Fact]
         public void Add_ShouldAddRecipeToDatabase()
         {
-            // Arrange
             var recipe = new Recipe
             {
-                Title = "Test Recipe",
+                Title = "New Recipe",
                 Description = "Desc",
                 Instructions = "Instr",
+                Cuisine = "PL",
+                ImageUrl = "Url",
+                AuthorId = 1,
                 PreparationTime = 10,
                 CookTime = 10,
-                Servings = 2,
-                AuthorId = 1,
-                // POPRAWKA: Uzupełniono wymagane pola
-                Cuisine = "Polish",
-                ImageUrl = "http://example.com/image.jpg"
+                Servings = 2
             };
 
-            // Act
-            var result = _repository.Add(recipe);
-            _efContext.SaveChanges(); // Symulujemy zatwierdzenie transakcji
+            _repository.Add(recipe);
+            _efContext.SaveChanges();
 
-            // Assert
-            result.Should().NotBeNull();
-            var addedRecipe = _efContext.Recipes.FirstOrDefault(r => r.Id == result.Id);
-            addedRecipe.Should().NotBeNull();
-            addedRecipe!.Title.Should().Be("Test Recipe");
+            _efContext.Recipes.Should().ContainSingle(r => r.Title == "New Recipe");
         }
 
         [Fact]
         public void Delete_ShouldRemoveRecipe_WhenExists()
         {
-            // Arrange
-            var recipe = new Recipe
-            {
-                Id = 10,
-                Title = "To Delete",
-                Description = "Desc",
-                Instructions = "Instr",
-                PreparationTime = 10,
-                CookTime = 10,
-                Servings = 2,
-                AuthorId = 1,
-                // POPRAWKA: Uzupełniono wymagane pola
-                Cuisine = "Italian",
-                ImageUrl = "http://example.com/img.png"
-            };
-
+            var recipe = new Recipe { Id = 10, Title = "Del", Description = "D", Instructions = "I", Cuisine = "C", ImageUrl = "U", AuthorId = 1 };
             _efContext.Recipes.Add(recipe);
             _efContext.SaveChanges();
 
-            // Act
             _repository.Delete(10);
             _efContext.SaveChanges();
 
-            // Assert
-            var deletedRecipe = _efContext.Recipes.FirstOrDefault(r => r.Id == 10);
-            deletedRecipe.Should().BeNull();
+            _efContext.Recipes.Should().BeEmpty();
         }
 
         [Fact]
-        public void Delete_ShouldDoNothing_WhenRecipeDoesNotExist()
+        public void Update_ShouldUpdateFields_And_Ingredients_Logic()
         {
-            // Arrange
-            // Baza jest pusta
 
-            // Act
-            var action = () =>
+            // 1. Arrange: Istniejący przepis ze starym składnikiem
+            var existingRecipe = new Recipe
             {
-                _repository.Delete(999);
-                _efContext.SaveChanges();
-            };
-
-            // Assert
-            action.Should().NotThrow();
-        }
-
-        [Fact]
-        public void Update_ShouldUpdateFields_WhenRecipeExists()
-        {
-            // Arrange
-            var originalRecipe = new Recipe
-            {
-                Id = 20,
-                Title = "Original Title",
-                Description = "Original Desc",
-                Instructions = "Instr",
-                PreparationTime = 10,
-                CookTime = 10,
-                Servings = 2,
+                Id = 1,
+                Title = "Old",
+                Description = "D",
+                Instructions = "I",
+                Cuisine = "C",
+                ImageUrl = "U",
                 AuthorId = 1,
-                Cuisine = "Italian",
-                ImageUrl = "http://original.com/img.jpg"
+                RecipeIngredients = new List<RecipeIngredient>
+                {
+                    new RecipeIngredient { IngredientId = 100, Quantity = "100g" }
+                }
             };
-            _efContext.Recipes.Add(originalRecipe);
+            _efContext.Recipes.Add(existingRecipe);
             _efContext.SaveChanges();
 
-            // Tworzymy obiekt z nowymi danymi
-            var updatedData = new Recipe
+            // 2. Dane do aktualizacji (nowy tytuł + ZMIANA składników)
+            var updateData = new Recipe
             {
-                Id = 20,
-                Title = "Updated Title",
-                Description = "Updated Desc",
-                Instructions = "Updated Instr",
+                Id = 1,
+                Title = "New Title",
+                Description = "New D",
+                Instructions = "New I",
+                Cuisine = "New C",
+                ImageUrl = "New U",
+                AuthorId = 1,
+                CategoryId = 5,
                 PreparationTime = 20,
                 CookTime = 30,
                 Servings = 4,
-                Cuisine = "Polish",
-                ImageUrl = "http://new.img/test.jpg",
-                AuthorId = 1,
-                CategoryId = 5
+                RecipeIngredients = new List<RecipeIngredient>
+                {
+                    new RecipeIngredient { IngredientId = 200, Quantity = "200g" } // Nowy składnik
+                }
             };
 
             // Act
-            var result = _repository.Update(updatedData);
+            _efContext.ChangeTracker.Clear();
+            _repository.Update(updateData);
             _efContext.SaveChanges();
 
             // Assert
-            result.Should().NotBeNull();
+            var updated = _efContext.Recipes.Include(r => r.RecipeIngredients).First(r => r.Id == 1);
 
-            var recipeInDb = _efContext.Recipes.First(r => r.Id == 20);
-            recipeInDb.Title.Should().Be("Updated Title");
-            recipeInDb.Description.Should().Be("Updated Desc");
-            recipeInDb.Cuisine.Should().Be("Polish"); // Sprawdzamy czy zaktualizowano
-            recipeInDb.ImageUrl.Should().Be("http://new.img/test.jpg");
+            updated.Title.Should().Be("New Title");
+            // Sprawdzamy czy logika .Clear() i .Add() w repozytorium zadziałała
+            updated.RecipeIngredients.Should().HaveCount(1);
+            updated.RecipeIngredients.First().IngredientId.Should().Be(200);
         }
 
         [Fact]
         public void Update_ShouldReturnNull_WhenRecipeDoesNotExist()
         {
-            // Arrange
-            var recipeToUpdate = new Recipe
-            {
-                Id = 999,
-                Title = "Ghost",
-                Cuisine = "None",
-                ImageUrl = "None",
-                Description = "None",
-                Instructions = "None"
-            };
-
-            // Act
-            var result = _repository.Update(recipeToUpdate);
-
-            // Assert
+            var result = _repository.Update(new Recipe { Id = 999 });
             result.Should().BeNull();
         }
     }

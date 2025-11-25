@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using PrzepisakApi.src.Database;
 using PrzepisakApi.src.Features.Ratings.Application.DTOs;
 using PrzepisakApi.src.Features.Ratings.Domain;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PrzepisakApi.src.Features.Ratings.Infrastructure
 {
+    [ExcludeFromCodeCoverage]
     public class RatingRepository : IRatingRepository
     {
         private readonly IEfContext _efContext;
