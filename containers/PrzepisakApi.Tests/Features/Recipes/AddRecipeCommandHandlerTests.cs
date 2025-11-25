@@ -71,6 +71,7 @@ namespace PrzepisakApi.Tests.Features.Recipes
                 ImageUrl = "http://image.url",
                 PreparationTime = 30,
                 CookTime = 45,
+                CategoryName = "Test Category",
                 Servings = 4
             };
 
