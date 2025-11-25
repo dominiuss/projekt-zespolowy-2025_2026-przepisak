@@ -6,10 +6,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-// Dodane przez Rafała
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+// Dodane przez Rafała
+using Microsoft.OpenApi;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using PrzepisakApi.api.src.Features.Auth.Infrastructure.Options;
 using PrzepisakApi.api.src.Features.Auth.Services;
@@ -21,6 +21,8 @@ using PrzepisakApi.src.Features.Recipes.Domain;
 using PrzepisakApi.src.Features.Recipes.Infrastructure;
 using PrzepisakApi.src.Features.UserProfile.Domain;
 using PrzepisakApi.src.Features.UserProfile.Infrastructure;
+using PrzepisakApi.src.Features.Ratings.Domain;
+using PrzepisakApi.src.Features.Ratings.Infrastructure;
 using Scalar.AspNetCore;
 using System.Reflection;
 using System.Text;
@@ -53,6 +55,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection(nameof(JwtSettings)));
 
@@ -96,6 +99,7 @@ builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
@@ -121,6 +125,7 @@ app.UseHttpsRedirection();
 
 // Zezwolenie na przyjmowanie zapytań
 app.UseCors("FrontendCorsPolicy");
+app.Urls.Add("http://0.0.0.0:5035");
 
 app.UseAuthorization();
 

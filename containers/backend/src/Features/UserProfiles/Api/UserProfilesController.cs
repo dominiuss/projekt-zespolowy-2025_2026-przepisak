@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrzepisakApi.src.Features.UserProfile.Application.GetUserProfile;
 using PrzepisakApi.src.Features.UserProfile.Application.UpdateUserProfile;
@@ -20,13 +21,18 @@ namespace PrzepisakApi.src.Features.UserProfile.Api
 
         private int GetCurrentUserId()
         {
-            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (idClaim is null)
-                return 1;
+            var idClaim = User.FindFirst("UserProfileId");
 
-            return int.Parse(idClaim.Value);
+            if (idClaim is null)
+                throw new UnauthorizedAccessException("Token nie zawiera UserProfileId.");
+
+            if (!int.TryParse(idClaim.Value, out int userId))
+                throw new Exception("Błąd formatu ID użytkownika w tokenie.");
+
+            return userId;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<UserProfileDTO>> Get()
         {
@@ -42,6 +48,7 @@ namespace PrzepisakApi.src.Features.UserProfile.Api
         }
 
         [HttpPut]
+        [Authorize]
         public async Task<ActionResult<UserProfileDTO>> Update([FromBody] UpdateProfileRequestDto dto)
         {
             var userId = GetCurrentUserId();

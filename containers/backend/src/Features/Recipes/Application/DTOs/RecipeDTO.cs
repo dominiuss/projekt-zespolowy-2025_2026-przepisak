@@ -1,8 +1,12 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
+
 namespace PrzepisakApi.src.Features.Recipes.Application.DTOs
 {
+    [ExcludeFromCodeCoverage]
     public class RecipeDTO
     {
+        public int Id { get; set; }
         public string Title { get; set; }
         public string AuthorName { get; set; }
         public string Description { get; set; }
@@ -15,5 +19,8 @@ namespace PrzepisakApi.src.Features.Recipes.Application.DTOs
         public string ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public double AverageRating { get; set; }
+        public int RatingsCount { get; set; }
+        public List<AddUpdateRecipeIngredientDTO> RecipeIngredients { get; set; } = new();
     }
 }
