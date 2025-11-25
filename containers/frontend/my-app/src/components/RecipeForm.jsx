@@ -51,7 +51,7 @@ export default function RecipeForm({ initialData = {}, onSubmit, buttonText }) {
       {
         ingredientId: ing.id,
         name: ing.name,
-        amount: currentAmount,
+        quantity: currentAmount,
       },
     ]);
 
