@@ -60,6 +60,11 @@ namespace PrzepisakApi.Tests.Features.Recipes
             }));
             _httpContextMock.Setup(h => h.HttpContext.User).Returns(claimsPrincipal);
 
+            // Test naprawy kategorii
+            var category = new Category { Id = 1, Name = "Test Category" };
+            _context.Categories.Add(category);
+            await _context.SaveChangesAsync();
+
             // 3. Mockujemy mapper - obiekt Recipe MUSI mieć wypełnione pola wymagane!
             var recipe = new Recipe
             {
@@ -71,7 +76,7 @@ namespace PrzepisakApi.Tests.Features.Recipes
                 ImageUrl = "http://image.url",
                 PreparationTime = 30,
                 CookTime = 45,
-                CategoryName = "Test Category",
+                CategoryId = category.Id,
                 Servings = 4
             };
 
