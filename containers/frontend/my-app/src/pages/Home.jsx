@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Home() {
   const [recipes, setRecipes] = useState([]);
@@ -8,6 +7,9 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const currentUser = localStorage.getItem("username");
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -27,7 +29,6 @@ export default function Home() {
     fetchAll();
   }, []);
 
-  
   const handleSearch = async () => {
     if (!search.trim()) {
       setSearchResults([]);
@@ -37,8 +38,8 @@ export default function Home() {
     setLoading(true);
     try {
       const [byNameRes, byTitleRes] = await Promise.all([
-        fetch(`http://10.6.57.161:5035/api/recipes/search/name?name=${search}`),
-        fetch(`http://10.6.57.161:5035/api/recipes/search/title?title=${search}`)
+        fetch(`http://10.6.57.161:5035/api/search/name?name=${search}`),
+        fetch(`http://10.6.57.161:5035/api/search/title?title=${search}`)
       ]);
 
       if (!byNameRes.ok || !byTitleRes.ok) throw new Error("Błąd wyszukiwania");
@@ -55,11 +56,23 @@ export default function Home() {
     }
   };
 
-  
   const displayedRecipes = searchResults.length > 0 ? searchResults : recipes;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-200 pt-24 px-4 flex flex-col items-center">
+
+      {/* Dodaj nowy przepis — tylko dla zalogowanego */}
+      {token && (
+        <div className="w-full max-w-6xl mb-4 flex justify-end">
+          <Link
+            to="/add-recipe"
+            className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition"
+          >
+            Dodaj nowy przepis
+          </Link>
+        </div>
+      )}
+
       <h1 className="text-4xl font-bold text-blue-700 mb-6 text-center">Przepisy</h1>
 
       {/* Panel wyszukiwania */}
@@ -88,41 +101,41 @@ export default function Home() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full">
           {displayedRecipes.map((recipe) => (
-            <Link
-              to={`/recipe/${recipe.id}`}
-              key={recipe.id}
-              className="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-105 transform transition block"
-            >
-              <img
-                src={recipe.imageUrl || "https://via.placeholder.com/400x300"}
-                alt={recipe.title}
-                className="w-full h-48 object-cover"
-              />
+            <div key={recipe.id} className="bg-white shadow-lg rounded-2xl overflow-hidden hover:scale-105 transform transition relative">
+              <Link to={`/recipes/${recipe.id}`}>
+                <img
+                  src={recipe.imageUrl || "https://via.placeholder.com/400x300"}
+                  alt={recipe.title}
+                  className="w-full h-48 object-cover rounded-2xl"
+                />
+              </Link>
               <div className="p-4">
                 <h2 className="text-xl font-semibold mb-1">{recipe.title}</h2>
-                <p className="text-sm text-gray-500 mb-2">Autor: {recipe.authorName}</p>
-                <p className="text-gray-600">{recipe.description}</p>
+                <p className="text-sm text-gray-500 mb-1">Autor: {recipe.authorName}</p>
 
-                {/* Ocena przepisu */}
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-yellow-500 text-lg">⭐</span>
-                  <span className="font-semibold">
-                    {recipe.averageRating ? recipe.averageRating.toFixed(1) : "Brak ocen"}
-                  </span>
-
-                  {recipe.ratingsCount > 0 && (
-                    <span className="text-gray-500 text-sm">
-                      ({recipe.ratingsCount} ocen)
-                    </span>
-                  )}
-                </div>
+                {/* Wyświetlanie oceny */}
+                {recipe.averageRating ? (
+                  <p className="text-yellow-600 font-medium">
+                    ⭐ {recipe.averageRating.toFixed(1)} ({recipe.ratingsCount})
+                  </p>
+                ) : (
+                  <p className="text-gray-400">Brak ocen</p>
+                )}
               </div>
-            </Link>
 
+              {/* Edytuj przepis — tylko dla autora */}
+              {currentUser === recipe.authorName && (
+                <Link
+                  to={`/edit-recipe/${recipe.id}`}
+                  className="absolute top-2 right-2 bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
+                >
+                  Edytuj
+                </Link>
+              )}
+            </div>
           ))}
         </div>
       )}
     </div>
   );
-
 }
