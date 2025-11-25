@@ -15,9 +15,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/recipe/:id" element={<RecipeDetails />} />
-        <Route path="/recipes/add" element={<AddRecipe />} />
-        <Route path="/recipes/edit/:id" element={<EditRecipe />} />
+        <Route path="/recipes/:id" element={<RecipeDetails />} />
+        <Route path="/add-recipe" element={<AddRecipe />} />
+        <Route path="/edit-recipe/:id" element={<EditRecipe />} />
       </Routes>
     </BrowserRouter>
   );
