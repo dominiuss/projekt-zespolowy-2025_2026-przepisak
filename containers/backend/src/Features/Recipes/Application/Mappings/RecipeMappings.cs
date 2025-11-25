@@ -63,7 +63,7 @@ namespace PrzepisakApi.src.Features.Recipes.Application.Mappings
                 .Map(dest => dest.CookTime, src => src.CookTime)
                 .Map(dest => dest.Servings, src => src.Servings)
                 .Map(dest => dest.CategoryId, src => src.CategoryId)
-                .Map(dest => dest.CategoryName, src => src.CategoryName)
+                .Map(dest => dest.CategoryName, src => src.Category.Name)
                 .Map(dest => dest.Cuisine, src => src.Cuisine)
                 .Map(dest => dest.ImageUrl, src => src.ImageUrl);
 
