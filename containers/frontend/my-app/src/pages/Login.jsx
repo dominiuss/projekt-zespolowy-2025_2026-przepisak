@@ -34,7 +34,7 @@ export default function Login() {
 
       // zapis access tokenu
       localStorage.setItem("token", data.token);
-
+      localStorage.setItem("username", formData.username);
       navigate("/"); // przekierowanie na stronę główną po loginie
     } catch (err) {
       alert("Błąd połączenia z backendem");
