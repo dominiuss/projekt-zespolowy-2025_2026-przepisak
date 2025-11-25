@@ -15,6 +15,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        // był tu błąd, /recipe zamiast /recipes
         <Route path="/recipes/:id" element={<RecipeDetails />} />
         <Route path="/add-recipe" element={<AddRecipe />} />
         <Route path="/edit-recipe/:id" element={<EditRecipe />} />
