@@ -1,7 +1,7 @@
 stages:
  # - lint
   - test
-  - migrate
+#  - migrate
   - build
   - deploy
 
@@ -81,38 +81,41 @@ test-backend:
     - dotnet restore PrzepisakApi.csproj
     - dotnet build PrzepisakApi.csproj --configuration Release
     - dotnet format PrzepisakApi.csproj --verify-no-changes --report codequality || true
-    - dotnet test PrzepisakApi.csproj --logger "trx;LogFileName=test-results.trx"
-    - ls -al
-    - ls -al codequality
-    - pwd
+    - cd ../PrzepisakApi.Tests
+    - dotnet restore PrzepisakApi.Tests.csproj
+    - dotnet build PrzepisakApi.Tests.csproj --configuration Release
+    - dotnet test PrzepisakApi.Tests.csproj --logger "trx;LogFileName=test-results.trx"
+#    - ls -al
+#    - ls -al codequality
+#    - pwd
   artifacts:
     when: always
     reports:
-      junit: containers/backend/test-results.trx
+      junit: containers/PrzepisakApi.Tests/test-results.trx
       codequality: containers/backend/codequality/format-report.json
     paths:
-      - containers/backend/test-result.trx
+      - containers/PrzepisakApi.Tests/test-result.trx
       - containers/backend/codequality/format-report.json
 
-migrate-backend:
-  stage: migrate
-  image: mcr.microsoft.com/dotnet/sdk:10.0
-  services:
-    - name: postgres:18
-      alias: db
-  variables:
-    POSTGRES_USER: student
-    POSTGRES_PASSWORD: wcy
-    POSTGRES_DB: przepisak
-  variables:
-    ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=przepisak;Username=student;Password=wcy"
-  script:
-    - dotnet tool install --global dotnet-ef
-    - export PATH="$PATH:/root/.dotnet/tools"
-    - dotnet restore containers/backend/PrzepisakApi.csproj
-    - dotnet build containers/backend/PrzepisakApi.csproj --no-restore
+#migrate-backend:
+#  stage: migrate
+##  image: mcr.microsoft.com/dotnet/sdk:10.0
+#  services:
+#    - name: postgres:18
+#      alias: db
+#  variables:
+#    POSTGRES_USER: student
+#    POSTGRES_PASSWORD: wcy
+#    POSTGRES_DB: przepisak
+#  variables:
+#    ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=przepisak;Username=student;Password=wcy"
+#  script:
+#    - dotnet tool install --global dotnet-ef
+#    - export PATH="$PATH:/root/.dotnet/tools"
+#    - dotnet restore containers/backend/PrzepisakApi.csproj
+#    - dotnet build containers/backend/PrzepisakApi.csproj --no-restore
 #    - dotnet ef migrations add SyncModel --project containers/backend/PrzepisakApi.csproj
-    - dotnet ef database update --project containers/backend/PrzepisakApi.csproj
+#    - dotnet ef database update --project containers/backend/PrzepisakApi.csproj
 #  only:
 #    - main
 
