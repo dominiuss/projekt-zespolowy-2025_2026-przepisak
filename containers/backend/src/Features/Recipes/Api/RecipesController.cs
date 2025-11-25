@@ -46,9 +46,9 @@ namespace PrzepisakApi.src.Features.Recipes.Api
         }
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<AddUpdateRecipeDTO>> Add([FromBody] AddUpdateRecipeDTO addUpdateRecipeDTO)
+        public async Task<ActionResult<AddUpdateRecipeDTO>> Add([FromBody] AddRecipeDTO addRecipeDTO)
         {
-            var command = _mapper.Map<AddRecipeCommand>(addUpdateRecipeDTO);
+            var command = _mapper.Map<AddRecipeCommand>(addRecipeDTO);
             var result = await _mediator.Send(command);
             return result != null ? CreatedAtAction(nameof(GetRecipeById), new { id = result.Id }, result) : BadRequest();
         }
