@@ -42,6 +42,15 @@ namespace PrzepisakApi.Tests.Features.Recipes
 
             var userProfile = new User { Id = 10, IdentityUserId = identityId, IdentityUser = identityUser };
 
+
+            // Dodanie kategorii do kontekstu (trzeba wypełnić wymagane pole Name)
+            var category = new Category
+            {
+                Id = 1,
+                Name = "Test Category"
+            };
+            _efContext.Categories.Add(category);
+
             // WYPEŁNIAMY WYMAGANE POLA:
             var recipe = new Recipe
             {
@@ -55,6 +64,7 @@ namespace PrzepisakApi.Tests.Features.Recipes
                 PreparationTime = 10,
                 CookTime = 10,
                 Servings = 2
+                CategoryId = category.Id
             };
 
             _efContext.Users.Add(userProfile);
@@ -95,6 +105,7 @@ namespace PrzepisakApi.Tests.Features.Recipes
                 PreparationTime = 10,
                 CookTime = 10,
                 Servings = 2
+                CategoryId = category.Id
             };
 
             _efContext.Users.Add(userProfile);
@@ -116,11 +127,29 @@ namespace PrzepisakApi.Tests.Features.Recipes
                 Description = "Desc",
                 Instructions = "Instr",
                 Cuisine = "Cuisine",
-                ImageUrl = "Url"
+                ImageUrl = "Url",
+                CategoryId = category.Id
             };
 
             _mapperMock.Setup(m => m.Map<Recipe>(command)).Returns(mappedRecipe);
-            _mapperMock.Setup(m => m.Map<AddUpdateRecipeDTO>(It.IsAny<Recipe>())).Returns(new AddUpdateRecipeDTO());
+            //_mapperMock.Setup(m => m.Map<AddUpdateRecipeDTO>(It.IsAny<Recipe>())).Returns(new AddUpdateRecipeDTO());
+             _mapperMock.Setup(m => m.Map<AddUpdateRecipeDTO>(It.IsAny<Recipe>()))
+                .Returns<Recipe>(r => new AddUpdateRecipeDTO
+                {
+                    Id = r.Id,
+                    Title = r.Title,
+                    Description = r.Description,
+                    Instructions = r.Instructions,
+                    PreparationTime = r.PreparationTime,
+                    CookTime = r.CookTime,
+                    Servings = r.Servings,
+                    CategoryId = r.CategoryId,
+                    CategoryName = category.Name, // <- poprawione, duża litera
+                    Cuisine = r.Cuisine,
+                    ImageUrl = r.ImageUrl,
+                    AuthorName = "test@test.com",
+                    RecipeIngredients = new List<AddUpdateRecipeIngredientDTO>()
+                });
 
             _repoMock.Setup(r => r.Update(It.IsAny<Recipe>())).Returns(mappedRecipe);
 
