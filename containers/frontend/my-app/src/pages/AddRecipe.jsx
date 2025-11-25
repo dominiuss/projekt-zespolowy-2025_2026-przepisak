@@ -15,28 +15,16 @@ export default function AddRecipe() {
 
     // form zawiera już recipeIngredients — NIE usuwaj tego
     const payload = {
-      addUpdateRecipeDTO: {
-        title: form.title,
-        description: form.description,
-        instructions: form.instructions,
-        preparationTime: Number(form.preparationTime),
-        cookTime: Number(form.cookTime),
-        servings: Number(form.servings),
-        categoryName: form.categoryName,
-        cuisine: form.cuisine,
-        imageUrl: form.imageUrl,
-        recipeIngredients: form.recipeIngredients
-      }
-      //title: form.title,
-      //description: form.description,
-      //instructions: form.instructions,
-      //preparationTime: form.preparationTime,
-      //cookTime: form.cookTime,
-      //servings: form.servings,
-      //categoryName: form.categoryName,
-      //cuisine: form.cuisine,
-      //imageUrl: form.imageUrl,
-      //recipeIngredients: form.recipeIngredients   
+      title: form.title,
+      description: form.description,
+      instructions: form.instructions,
+      preparationTime: form.preparationTime,
+      cookTime: form.cookTime,
+      servings: form.servings,
+      categoryName: form.categoryName,
+      cuisine: form.cuisine,
+      imageUrl: form.imageUrl,
+      recipeIngredients: form.recipeIngredients   
     };
 
     const res = await fetch("http://10.6.57.161:5035/api/recipes", {
