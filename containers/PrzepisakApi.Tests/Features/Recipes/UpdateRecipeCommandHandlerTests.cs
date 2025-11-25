@@ -63,7 +63,7 @@ namespace PrzepisakApi.Tests.Features.Recipes
                 ImageUrl = "Url",
                 PreparationTime = 10,
                 CookTime = 10,
-                Servings = 2
+                Servings = 2,
                 CategoryId = category.Id
             };
 
@@ -104,7 +104,7 @@ namespace PrzepisakApi.Tests.Features.Recipes
                 ImageUrl = "Url",
                 PreparationTime = 10,
                 CookTime = 10,
-                Servings = 2
+                Servings = 2,
                 CategoryId = category.Id
             };
 
