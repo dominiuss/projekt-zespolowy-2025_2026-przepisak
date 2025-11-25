@@ -38,8 +38,8 @@ export default function Home() {
     setLoading(true);
     try {
       const [byNameRes, byTitleRes] = await Promise.all([
-        fetch(`http://10.6.57.161:5035/api/search/name?name=${search}`),
-        fetch(`http://10.6.57.161:5035/api/search/title?title=${search}`)
+        fetch(`http://10.6.57.161:5035/api/recipes/search/name?name=${search}`),
+        fetch(`http://10.6.57.161:5035/api/recipes/search/title?title=${search}`)
       ]);
 
       if (!byNameRes.ok || !byTitleRes.ok) throw new Error("Błąd wyszukiwania");
