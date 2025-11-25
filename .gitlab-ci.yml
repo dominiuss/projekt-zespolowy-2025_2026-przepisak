@@ -81,7 +81,9 @@ test-backend:
     - dotnet restore PrzepisakApi.csproj
     - dotnet build PrzepisakApi.csproj --configuration Release
     - dotnet format PrzepisakApi.csproj --verify-no-changes --report codequality || true
-    - dotnet test PrzepisakApi.csproj --logger "trx;LogFileName=test-results.trx"
+    - dotnet restore PrzepisakApi.Tests.csproj
+    - dotnet build PrzepisakApi.Tests.csproj --configuration Release
+    - dotnet test PrzepisakApi.Tests.csproj --logger "trx;LogFileName=test-results.trx"
     - ls -al
     - ls -al codequality
     - pwd
